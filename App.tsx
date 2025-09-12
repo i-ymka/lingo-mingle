@@ -1,0 +1,66 @@
+import React from 'react';
+import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { DataProvider, useData } from './contexts/DataContext';
+import { ThemeProvider } from './contexts/ThemeContext';
+import SplashScreen from './components/screens/SplashScreen';
+import OnboardingScreen from './components/screens/OnboardingScreen';
+import PairingScreen from './components/screens/PairingScreen';
+import MainLayout from './components/screens/MainLayout';
+import InboxScreen from './components/screens/InboxScreen';
+import StudyScreen from './components/screens/StudyScreen';
+import AddWordScreen from './components/screens/AddWordScreen';
+import StatsScreen from './components/screens/StatsScreen';
+import AllWordsScreen from './components/screens/AllWordsScreen';
+import CompleteWordScreen from './components/screens/CompleteWordScreen';
+import SettingsScreen from './components/screens/SettingsScreen';
+import ProfileScreen from './components/screens/ProfileScreen';
+
+const App: React.FC = () => {
+  return (
+    <ThemeProvider>
+      <DataProvider>
+        <AppRouter />
+      </DataProvider>
+    </ThemeProvider>
+  );
+};
+
+const AppRouter: React.FC = () => {
+  const { user, pair } = useData();
+
+  return (
+    <div className="h-screen w-screen max-w-md mx-auto bg-base-100 text-text-main font-sans flex flex-col shadow-2xl">
+      <HashRouter>
+        <Routes>
+          {!user ? (
+            <>
+              <Route path="/" element={<SplashScreen />} />
+              <Route path="/onboarding" element={<OnboardingScreen />} />
+              <Route path="*" element={<Navigate to="/" />} />
+            </>
+          ) : !pair ? (
+            <>
+              <Route path="/pairing" element={<PairingScreen />} />
+              <Route path="*" element={<Navigate to="/pairing" />} />
+            </>
+          ) : (
+            <Route path="/" element={<MainLayout />}>
+              <Route index element={<Navigate to="/inbox" />} />
+              <Route path="inbox" element={<InboxScreen />} />
+              <Route path="inbox/complete/:entryId" element={<CompleteWordScreen />} />
+              <Route path="study" element={<StudyScreen />} />
+              <Route path="add" element={<AddWordScreen />} />
+              <Route path="words" element={<AllWordsScreen />} />
+              <Route path="stats" element={<StatsScreen />} />
+              <Route path="settings" element={<SettingsScreen />} />
+              <Route path="profile" element={<ProfileScreen />} />
+              <Route path="*" element={<Navigate to="/inbox" />} />
+            </Route>
+          )}
+        </Routes>
+      </HashRouter>
+    </div>
+  );
+};
+
+export default App;

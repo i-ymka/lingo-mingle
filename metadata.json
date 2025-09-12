@@ -1,0 +1,7 @@
+{
+  "name": "Lingo Mingle for Couples",
+  "description": "A language exchange app for couples to build a shared vocabulary. Partners contribute native pronunciations and translations, then learn together using spaced-repetition flashcards.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}

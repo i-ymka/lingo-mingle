@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="vite.svg" />
+    <link rel="manifest" href="manifest.webmanifest" />
+    <meta name="theme-color" content="#a78bfa" />
+    <!-- iOS PWA meta -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <link rel="apple-touch-icon" href="vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Lingo Mingle</title>
+    <style>
+      :root.theme-meadow {
+        --color-primary: #a78bfa;
+        --color-secondary: #6ee7b7;
+        --color-accent: #fde047;
+        --color-neutral: #4b5563;
+        --color-base-100: #f9fafb;
+        --color-base-200: #f3f4f6;
+        --color-base-300: #e5e7eb;
+        --color-text-main: #111827;
+        --color-text-muted: #6b7280;
+        --color-primary-content: #ffffff;
+      }
+      :root.theme-daybreak {
+        --color-primary: #fb923c;
+        --color-secondary: #60a5fa;
+        --color-accent: #f472b6;
+        --color-neutral: #44403c;
+        --color-base-100: #fffbeb;
+        --color-base-200: #fef3c7;
+        --color-base-300: #fee2e2;
+        --color-text-main: #1c1917;
+        --color-text-muted: #57534e;
+        --color-primary-content: #1c1917;
+      }
+      :root.theme-twilight {
+        --color-primary: #818cf8;
+        --color-secondary: #2dd4bf;
+        --color-accent: #f471b5;
+        --color-neutral: #d1d5db;
+        --color-base-100: #1f2937;
+        --color-base-200: #111827;
+        --color-base-300: #030712;
+        --color-text-main: #f9fafb;
+        --color-text-muted: #9ca3af;
+        --color-primary-content: #ffffff;
+      }
+      :root.theme-forest {
+        --color-primary: #4ade80;
+        --color-secondary: #facc15;
+        --color-accent: #e879f9;
+        --color-neutral: #a8a29e;
+        --color-base-100: #292524;
+        --color-base-200: #1c1917;
+        --color-base-300: #0c0a09;
+        --color-text-main: #fafaf9;
+        --color-text-muted: #a8a29e;
+        --color-primary-content: #1c1917;
+      }
+    </style>
+    <link rel="stylesheet" href="index.css">
+</head>
+  <body class="bg-base-300">
+    <div id="root"></div>
+    <script type="module" src="/index.tsx"></script>
+  </body>
+</html>
