@@ -3,10 +3,26 @@ import { useNavigate } from 'react-router-dom';
 import Button from '../ui/Button';
 
 const slideData = [
-  { image: 'images/slide1.svg', alt: 'Gradient 1' },
-  { image: 'images/slide2.svg', alt: 'Gradient 2' },
-  { image: 'images/slide3.svg', alt: 'Gradient 3' },
-  { image: 'images/slide4.svg', alt: 'Gradient 4' }
+  {
+    image:
+      'https://images.unsplash.com/photo-1543109740-03f3a735a299?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+    alt: 'A happy couple walking on a beach at sunset.'
+  },
+  {
+    image:
+      'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?q=80&w=2532&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+    alt: 'A diverse group of friends smiling and laughing together.'
+  },
+  {
+    image:
+      'https://images.unsplash.com/photo-1502808726242-cac58b8d2179?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+    alt: 'A couple sitting closely together on a couch, looking at each other.'
+  },
+  {
+    image:
+      'https://images.unsplash.com/photo-1551523925-63795c3a33a3?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+    alt: 'A couple sharing a fun moment and laughing in a city.'
+  }
 ];
 
 const SplashScreen: React.FC = () => {
@@ -38,7 +54,7 @@ const SplashScreen: React.FC = () => {
           />
       ))}
       
-      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
+      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent"></div>
       
       <div className="relative z-10 p-8 flex flex-col items-center text-center">
         <h1 className="text-5xl font-extrabold text-primary-content mb-3 drop-shadow-lg" style={{fontFamily: 'sans-serif'}}>Lingo Mingle</h1>
