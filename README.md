@@ -1,20 +1,44 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+Lingo Mingle — офлайн PWA для пары
+=================================
 
-# Run and deploy your AI Studio app
+Мини‑приложение для изучения слов вместе с партнёром. Работает как офлайн‑PWA: можно установить с Safari на экран Домой и пользоваться без интернета.
 
-This contains everything you need to run your app locally.
+Сделано на: React + TypeScript + Vite + Tailwind (локальная сборка). Без внешних CDN.
 
-View your app in AI Studio: https://ai.studio/apps/drive/1dHZe2H_EPngmZmnDX2yNfn57sONNlZ7o
+Возможности
+- Офлайн‑режим: весь интерфейс и ресурсы кэшируются сервис‑воркером.
+- Локальное хранение: данные сохраняются в `localStorage` на устройстве.
+- Лёгкая установка на iPhone/Android как PWA (значок на Домой, полноэкранный режим).
 
-## Run Locally
+Локальная разработка
+- Установка зависимостей: `npm ci` (или `npm install`)
+- Запуск дев‑сервера: `npm run dev`
+- Продакшн‑сборка: `npm run build` (файлы в `dist/`)
 
-**Prerequisites:**  Node.js
+Деплой на GitHub Pages (настроено)
+1) Репозиторий уже содержит GitHub Actions: `.github/workflows/deploy.yml`.
+2) В `Settings → Pages` выбери Source: GitHub Actions (уже сделано).
+3) Любой пуш в ветку `main` автоматически:
+   - собирает проект (`npm run build`)
+   - публикует содержимое `dist/` на GitHub Pages
+4) Готовый URL появится в `Settings → Pages` и в выводе Actions.
 
+Установка как PWA на iPhone
+1) Открой сайт в Safari по адресу GitHub Pages.
+2) Нажми «Поделиться» → «На экран Домой».
+3) Первый запуск сделай онлайн (для первичного кэша), далее работает офлайн.
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+Заметки по офлайну
+- В проекте добавлены `public/manifest.webmanifest` и `public/service-worker.js`.
+- Регистрация сервис‑воркера — в `index.tsx`.
+- Путь для GitHub Pages (подпапка) учтён: `vite.config.ts` с `base: './'` и относительные ссылки в `index.html`.
+
+Иконки и сплэш
+- Сейчас используется `vite.svg` как иконка. Можно заменить на свои PNG‑иконки (192/512) и обновить `public/manifest.webmanifest` и `<link rel="apple-touch-icon">`.
+
+FAQ
+- Можно ли установить «как файл» на iPhone без аккаунта разработчика? Нет. Но PWA ставится на Домой и работает офлайн, что покрывает большинство сценариев.
+- Почему нет внешних ссылок на CDN? Чтобы приложение было полностью офлайн.
+
+Лицензия
+- Частное использование. Не добавляйте чувствительные ключи в репозиторий.
