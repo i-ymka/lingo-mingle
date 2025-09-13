@@ -1,17 +1,12 @@
 /* Simple offline-first service worker */
-const CACHE_NAME = 'lingo-mingle-cache-v2';
+const CACHE_NAME = 'lingo-mingle-cache-v3';
 // Derive base path when hosted under a subfolder (GitHub Pages)
 const BASE_PATH = self.location.pathname.replace(/service-worker\.js$/, '');
 const APP_SHELL = [
   BASE_PATH,
   BASE_PATH + 'index.html',
   BASE_PATH + 'manifest.webmanifest',
-  BASE_PATH + 'index.css',
-  BASE_PATH + 'vite.svg',
-  BASE_PATH + 'images/slide1.svg',
-  BASE_PATH + 'images/slide2.svg',
-  BASE_PATH + 'images/slide3.svg',
-  BASE_PATH + 'images/slide4.svg'
+  BASE_PATH + 'vite.svg'
 ];
 
 self.addEventListener('install', (event) => {
@@ -72,20 +67,7 @@ self.addEventListener('fetch', (event) => {
     );
     return;
   }
-
-  // Cross-origin (e.g., images if any): cache-first
-  event.respondWith(
-    (async () => {
-      const cache = await caches.open(CACHE_NAME);
-      const cached = await cache.match(req);
-      if (cached) return cached;
-      try {
-        const res = await fetch(req, { mode: 'no-cors' });
-        cache.put(req, res.clone());
-        return res;
-      } catch (e) {
-        return Response.error();
-      }
-    })()
-  );
+  // For cross-origin requests (e.g., Unsplash images), let the network handle it.
+  // This avoids issues with opaque responses and ensures images load normally.
+  return;
 });
