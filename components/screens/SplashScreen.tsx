@@ -1,27 +1,27 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Button from '../ui/Button';
+import hero1 from '../../assets/hero/hero-1.jpg';
+import hero2 from '../../assets/hero/hero-2.jpg';
+import hero3 from '../../assets/hero/hero-3.jpg';
+import hero4 from '../../assets/hero/hero-4.jpg';
 
 const slideData = [
   {
-    image:
-      'https://images.unsplash.com/photo-1543109740-03f3a735a299?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-    alt: 'A happy couple walking on a beach at sunset.'
+    image: hero1,
+    alt: 'Partners studying together at a cozy table with notebooks and smiles.'
   },
   {
-    image:
-      'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?q=80&w=2532&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-    alt: 'A diverse group of friends smiling and laughing together.'
+    image: hero2,
+    alt: 'Couple enjoying coffee and conversation in a bright cafe.'
   },
   {
-    image:
-      'https://images.unsplash.com/photo-1502808726242-cac58b8d2179?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-    alt: 'A couple sitting closely together on a couch, looking at each other.'
+    image: hero3,
+    alt: 'Partners walking through the city laughing together.'
   },
   {
-    image:
-      'https://images.unsplash.com/photo-1551523925-63795c3a33a3?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-    alt: 'A couple sharing a fun moment and laughing in a city.'
+    image: hero4,
+    alt: 'Couple relaxing on a couch and looking at each other affectionately.'
   }
 ];
 
