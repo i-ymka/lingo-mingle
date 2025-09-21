@@ -9,19 +9,19 @@ import hero4 from '../../assets/hero/hero-4.jpg';
 const slideData = [
   {
     image: hero1,
-    alt: 'Partners studying together at a cozy table with notebooks and smiles.'
+    alt: 'Intercultural couple reviewing flashcards together at a sunlit table.'
   },
   {
     image: hero2,
-    alt: 'Couple enjoying coffee and conversation in a bright cafe.'
+    alt: 'Multilingual partners sharing headphones and laughing on the sofa.'
   },
   {
     image: hero3,
-    alt: 'Partners walking through the city laughing together.'
+    alt: 'Couple learning with a laptop and video chatting with friends abroad.'
   },
   {
     image: hero4,
-    alt: 'Couple relaxing on a couch and looking at each other affectionately.'
+    alt: 'Partners cooking together and practicing phrases in the kitchen.'
   }
 ];
 
