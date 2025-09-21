@@ -1,5 +1,5 @@
 /* Simple offline-first service worker */
-const CACHE_NAME = 'lingo-mingle-cache-v4';
+const CACHE_NAME = 'lingo-mingle-cache-v5';
 // Derive base path when hosted under a subfolder (GitHub Pages)
 const BASE_PATH = self.location.pathname.replace(/service-worker\.js$/, '');
 const APP_SHELL = [
