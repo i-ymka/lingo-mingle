@@ -1,9 +1,9 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+@config "./tailwind.config.js";
 
-/* App base sizing to match the container used in App.tsx */
-html, body, #root {
-  height: 100%;
+@layer base {
+  /* App base sizing to match the container used in App.tsx */
+  html, body, #root {
+    height: 100%;
+  }
 }
-
