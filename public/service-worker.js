@@ -1,5 +1,5 @@
 /* Simple offline-first service worker */
-const CACHE_NAME = 'lingo-mingle-cache-v3';
+const CACHE_NAME = 'lingo-mingle-cache-v4';
 // Derive base path when hosted under a subfolder (GitHub Pages)
 const BASE_PATH = self.location.pathname.replace(/service-worker\.js$/, '');
 const APP_SHELL = [
@@ -10,9 +10,23 @@ const APP_SHELL = [
 ];
 
 self.addEventListener('install', (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(APP_SHELL))
-  );
+  event.waitUntil((async () => {
+    const cache = await caches.open(CACHE_NAME);
+    // Cache core shell
+    await cache.addAll(APP_SHELL);
+    // Also cache built CSS/JS assets by parsing index.html
+    try {
+      const res = await fetch(BASE_PATH + 'index.html', { cache: 'no-store' });
+      const html = await res.text();
+      const assetHrefs = Array.from(html.matchAll(/(href|src)=["']([^"']+)["']/g))
+        .map((m) => m[2])
+        .filter((p) => p.includes('assets/'))
+        .map((p) => (p.startsWith('http') ? p : (p.startsWith('.') ? BASE_PATH + p.slice(2) : BASE_PATH + p)));
+      await cache.addAll(assetHrefs);
+    } catch (e) {
+      // ignore if offline during first install
+    }
+  })());
   self.skipWaiting();
 });
 
