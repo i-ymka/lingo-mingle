@@ -20,7 +20,7 @@ const PairingScreen: React.FC = () => {
   const handleCreatePair = () => {
     const newPair = api.createPair(user.id);
     setCreatedCode(newPair.inviteCode);
-    loadPair(newPair.id); // Creator also gets linked
+    // Don't load pair yet - let user see the code and manually continue
   };
 
   const handleJoinPair = (e: React.FormEvent) => {
@@ -35,6 +35,15 @@ const PairingScreen: React.FC = () => {
     }
   };
 
+  const handleGoToApp = () => {
+    // Find the pair by invite code and load it
+    const pair = api.getPairByInviteCode(createdCode!);
+    if (pair) {
+      loadPair(pair.id);
+      navigate('/inbox');
+    }
+  };
+
   if (createdCode) {
     return (
       <div className="flex flex-col items-center justify-center h-full p-6 text-center">
@@ -43,9 +52,9 @@ const PairingScreen: React.FC = () => {
         <div className="bg-primary text-primary-content font-mono text-4xl tracking-widest p-6 rounded-lg shadow-lg">
           {createdCode}
         </div>
-        <p className="text-text-muted mt-6">Once your partner joins, you'll be taken to the app.</p>
+        <p className="text-text-muted mt-6">Ready to start? Click below to continue.</p>
          <div className="mt-auto w-full">
-            <Button onClick={() => navigate('/inbox')}>Go to App</Button>
+            <Button onClick={handleGoToApp}>Go to App</Button>
         </div>
       </div>
     );

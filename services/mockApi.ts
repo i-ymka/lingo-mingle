@@ -63,6 +63,11 @@ export const getPair = (pairId: string): Pair | null => {
     return allPairs.find(p => p.id === pairId) || null;
 };
 
+export const getPairByInviteCode = (inviteCode: string): Pair | null => {
+    const allPairs = get<Pair[]>('pairs') || [];
+    return allPairs.find(p => p.inviteCode === inviteCode) || null;
+};
+
 // Entry Management
 export const getEntries = (pairId: string): Entry[] => {
     const allEntries = get<Entry[]>('entries') || [];
