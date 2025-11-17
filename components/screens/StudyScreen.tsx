@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useData } from '../../contexts/DataContext';
-import * as api from '../../services/mockApi';
+import * as mockApi from '../../services/mockApi';
+import * as firebaseApi from '../../services/firebaseApi';
 import type { Entry, SrsDecision } from '../../types';
 import Button from '../ui/Button';
 import AudioPlayer from '../ui/AudioPlayer';
@@ -15,11 +16,12 @@ interface Flashcard {
 }
 
 const StudyScreen: React.FC = () => {
-  const { user, userRole, reloadEntries } = useData();
+  const { user, userRole, pair, reloadEntries, useFirebase } = useData();
   const [dueCards, setDueCards] = useState<Flashcard[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [side, setSide] = useState<FlashcardSide>('front');
   const [sessionComplete, setSessionComplete] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   // Fisher-Yates shuffle algorithm for uniform distribution
   const shuffleArray = <T,>(array: T[]): T[] => {
@@ -31,20 +33,43 @@ const StudyScreen: React.FC = () => {
     return shuffled;
   };
   
-  const loadDueCards = useCallback(() => {
-    if (user && userRole) {
-      const dueEntries = api.getDueReviews(user.pairId!, userRole);
-      const generatedCards: Flashcard[] = dueEntries.flatMap(entry => ([
-        { entry, type: 'pivot_to_partner' as FlashcardType },
-        { entry, type: 'partner_to_pivot' as FlashcardType },
-        { entry, type: 'partner_audio_to_pivot' as FlashcardType }
-      ]));
-      setDueCards(shuffleArray(generatedCards));
-      setCurrentIndex(0);
-      setSide('front');
-      setSessionComplete(generatedCards.length === 0);
+  const loadDueCards = useCallback(async () => {
+    if (user && userRole && pair) {
+      setIsLoading(true);
+
+      try {
+        let dueEntries: Entry[];
+
+        if (useFirebase) {
+          // Firebase
+          console.log('🔥 Loading due reviews from Firebase...');
+          dueEntries = await firebaseApi.getDueEntries(pair.id, userRole);
+          console.log(`✅ Loaded ${dueEntries.length} due entries from Firebase`);
+        } else {
+          // localStorage
+          console.log('💾 Loading due reviews from localStorage...');
+          dueEntries = mockApi.getDueReviews(pair.id, userRole);
+          console.log(`✅ Loaded ${dueEntries.length} due entries from localStorage`);
+        }
+
+        const generatedCards: Flashcard[] = dueEntries.flatMap(entry => ([
+          { entry, type: 'pivot_to_partner' as FlashcardType },
+          { entry, type: 'partner_to_pivot' as FlashcardType },
+          { entry, type: 'partner_audio_to_pivot' as FlashcardType }
+        ]));
+
+        setDueCards(shuffleArray(generatedCards));
+        setCurrentIndex(0);
+        setSide('front');
+        setSessionComplete(generatedCards.length === 0);
+      } catch (error) {
+        console.error('❌ Failed to load due cards:', error);
+        setSessionComplete(true);
+      } finally {
+        setIsLoading(false);
+      }
     }
-  }, [user, userRole]);
+  }, [user, userRole, pair, useFirebase]);
 
   useEffect(() => {
     loadDueCards();
@@ -86,15 +111,43 @@ const StudyScreen: React.FC = () => {
     }
   }, [currentCard, partnerRole]);
 
-  const handleDecision = (decision: SrsDecision) => {
-    if (!currentCard || !userRole) return;
-    api.updateReview(currentCard.entry.id, userRole, decision);
-    if (currentIndex + 1 < dueCards.length) {
-      setCurrentIndex(currentIndex + 1);
-      setSide('front');
-    } else {
-      setSessionComplete(true);
-      reloadEntries();
+  const handleDecision = async (decision: SrsDecision) => {
+    if (!currentCard || !userRole || !pair) return;
+
+    setIsLoading(true);
+
+    try {
+      if (useFirebase) {
+        // Firebase
+        console.log(`🔥 Updating SRS data in Firebase for entry ${currentCard.entry.id}...`);
+        await firebaseApi.updateSRSData(
+          pair.id,
+          currentCard.entry.id,
+          userRole,
+          decision
+        );
+        console.log('✅ SRS data updated in Firebase');
+        // Real-time listener will update entries automatically
+      } else {
+        // localStorage
+        console.log(`💾 Updating review in localStorage for entry ${currentCard.entry.id}...`);
+        mockApi.updateReview(currentCard.entry.id, userRole, decision);
+        console.log('✅ Review updated in localStorage');
+      }
+
+      if (currentIndex + 1 < dueCards.length) {
+        setCurrentIndex(currentIndex + 1);
+        setSide('front');
+      } else {
+        setSessionComplete(true);
+        if (!useFirebase) {
+          reloadEntries();
+        }
+      }
+    } catch (error) {
+      console.error('❌ Failed to update review:', error);
+    } finally {
+      setIsLoading(false);
     }
   };
   
@@ -118,7 +171,7 @@ const StudyScreen: React.FC = () => {
     );
   }
 
-  if (!currentCard) {
+  if (!currentCard || isLoading) {
     return <div className="p-4">Loading study session...</div>;
   }
 

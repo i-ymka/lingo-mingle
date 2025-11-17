@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useData } from '../../contexts/DataContext';
-import { createUser } from '../../services/mockApi';
+import { createUser as createUserLocalStorage } from '../../services/mockApi';
+import { signInAnonymously } from '../../services/authService';
+import { createUser as createUserFirebase } from '../../services/firebaseApi';
 import { LANGUAGES } from '../../constants';
 import type { Language } from '../../types';
 import Button from '../ui/Button';
@@ -13,21 +15,52 @@ const OnboardingScreen: React.FC = () => {
   const [nativeLangCode, setNativeLangCode] = useState('');
   const [partnerLangCode, setPartnerLangCode] = useState('');
   const [pivotLangCode, setPivotLangCode] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
   const navigate = useNavigate();
-  const { login } = useData();
+  const { login, useFirebase } = useData();
 
   const languageOptions = LANGUAGES.map(l => ({ value: l.code, label: l.name }));
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (name && nativeLangCode && partnerLangCode && pivotLangCode) {
-      const nativeLang = LANGUAGES.find(l => l.code === nativeLangCode) as Language;
-      const partnerNativeLang = LANGUAGES.find(l => l.code === partnerLangCode) as Language;
-      const pivotLang = LANGUAGES.find(l => l.code === pivotLangCode) as Language;
+    setIsLoading(true);
+    setError('');
 
-      const newUser = createUser(name, nativeLang, partnerNativeLang, pivotLang);
-      login(newUser);
-      navigate('/pairing');
+    if (name && nativeLangCode && partnerLangCode && pivotLangCode) {
+      try {
+        const nativeLang = LANGUAGES.find(l => l.code === nativeLangCode) as Language;
+        const partnerNativeLang = LANGUAGES.find(l => l.code === partnerLangCode) as Language;
+        const pivotLang = LANGUAGES.find(l => l.code === pivotLangCode) as Language;
+
+        if (useFirebase) {
+          // Firebase: Sign in anonymously, then create user in Firestore
+          console.log('🔥 Creating user with Firebase...');
+          const authUser = await signInAnonymously();
+          const newUser = await createUserFirebase(
+            authUser.uid,
+            name,
+            nativeLang,
+            partnerNativeLang,
+            pivotLang
+          );
+          login(newUser);
+          console.log('✅ User created in Firebase:', newUser.id);
+        } else {
+          // localStorage
+          console.log('💾 Creating user with localStorage...');
+          const newUser = createUserLocalStorage(name, nativeLang, partnerNativeLang, pivotLang);
+          login(newUser);
+          console.log('✅ User created in localStorage:', newUser.id);
+        }
+
+        navigate('/pairing');
+      } catch (err) {
+        console.error('❌ Failed to create user:', err);
+        setError('Failed to create user profile. Please try again.');
+      } finally {
+        setIsLoading(false);
+      }
     }
   };
 
@@ -69,9 +102,14 @@ const OnboardingScreen: React.FC = () => {
           options={languageOptions}
           required
         />
+        {error && (
+          <div className="text-red-500 text-sm p-3 bg-red-50 rounded-lg">
+            {error}
+          </div>
+        )}
         <div className="mt-auto pt-4">
-          <Button type="submit">
-            Continue
+          <Button type="submit" disabled={isLoading}>
+            {isLoading ? 'Creating Profile...' : 'Continue'}
           </Button>
         </div>
       </form>
