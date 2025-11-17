@@ -10,13 +10,23 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({ audioData }) => {
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
+    // Cleanup previous audio instance
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.onended = null;
+      audioRef.current = null;
+    }
+
+    // Create new audio instance only if audioData exists
     if (audioData) {
       audioRef.current = new Audio(audioData);
       audioRef.current.onended = () => setIsPlaying(false);
     }
+
     return () => {
       if (audioRef.current) {
         audioRef.current.pause();
+        audioRef.current.onended = null;
         audioRef.current = null;
       }
     };
