@@ -26,7 +26,21 @@ const App: React.FC = () => {
 };
 
 const AppRouter: React.FC = () => {
-  const { user, pair } = useData();
+  const { user, pair, isLoading } = useData();
+
+  // Show loading screen while Firebase initializes
+  if (isLoading) {
+    return (
+      <div className="h-screen w-screen max-w-md mx-auto bg-base-100 text-text-main font-sans flex flex-col shadow-2xl">
+        <div className="flex items-center justify-center h-full">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-primary mx-auto mb-4"></div>
+            <p className="text-text-muted">Loading...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="h-screen w-screen max-w-md mx-auto bg-base-100 text-text-main font-sans flex flex-col shadow-2xl">

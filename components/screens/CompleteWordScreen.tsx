@@ -55,12 +55,12 @@ const CompleteWordScreen: React.FC = () => {
           // Firebase: Update entry text and audio
           console.log('🔥 Completing entry in Firebase...');
 
-          // Update text
-          await firebaseApi.updateEntryText(
+          // Update text field based on user role
+          const textField = userRole === 'A' ? 'text_native_A' : 'text_native_B';
+          await firebaseApi.updateEntry(
             pair.id,
             entryId,
-            userRole,
-            nativeText
+            { [textField]: nativeText }
           );
 
           // Update audio

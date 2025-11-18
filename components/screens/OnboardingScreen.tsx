@@ -57,7 +57,10 @@ const OnboardingScreen: React.FC = () => {
         navigate('/pairing');
       } catch (err) {
         console.error('❌ Failed to create user:', err);
-        setError('Failed to create user profile. Please try again.');
+        // Show detailed error message for debugging
+        const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+        console.error('❌ Error details:', errorMessage);
+        setError(`Failed to create user profile: ${errorMessage}`);
       } finally {
         setIsLoading(false);
       }

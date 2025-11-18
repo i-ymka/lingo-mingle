@@ -25,11 +25,17 @@ export const createUser = async (
   };
 
   try {
-    await setDoc(userRef, {
-      ...newUser,
+    // Firestore doesn't support undefined values, so we omit them
+    const firestoreData: any = {
+      displayName,
+      nativeLang,
+      partnerNativeLang,
+      pivotLang,
       createdAt: Timestamp.now(),
       updatedAt: Timestamp.now(),
-    });
+    };
+
+    await setDoc(userRef, firestoreData);
 
     console.log('✅ User created:', authId);
     return newUser;
@@ -75,10 +81,17 @@ export const updateUser = async (userId: string, updates: Partial<User>): Promis
   const userRef = doc(db, 'users', userId);
 
   try {
-    await updateDoc(userRef, {
-      ...updates,
-      updatedAt: Timestamp.now(),
+    // Filter out undefined values as Firestore doesn't support them
+    const firestoreUpdates: any = { updatedAt: Timestamp.now() };
+
+    Object.keys(updates).forEach(key => {
+      const value = (updates as any)[key];
+      if (value !== undefined) {
+        firestoreUpdates[key] = value;
+      }
     });
+
+    await updateDoc(userRef, firestoreUpdates);
 
     console.log('✅ User updated:', userId);
   } catch (error) {

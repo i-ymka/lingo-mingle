@@ -26,14 +26,14 @@ const RecorderControl: React.FC<RecorderControlProps> = ({ onRecordingComplete }
       {error && <p className="text-red-500 text-sm mb-2">{error}</p>}
       
       {status === 'idle' && (
-        <button onClick={() => startRecording()} className="flex flex-col items-center text-primary hover:opacity-80">
+        <button type="button" onClick={() => startRecording()} className="flex flex-col items-center text-primary hover:opacity-80">
           <Mic size={48} />
           <span className="mt-2 font-semibold">Tap to Record</span>
         </button>
       )}
 
       {status === 'recording' && (
-        <button onClick={() => stopRecording()} className="flex flex-col items-center text-red-600 animate-pulse">
+        <button type="button" onClick={() => stopRecording()} className="flex flex-col items-center text-red-600 animate-pulse">
           <StopCircle size={48} />
           <span className="mt-2 font-semibold">Recording... Tap to Stop</span>
         </button>
@@ -43,8 +43,9 @@ const RecorderControl: React.FC<RecorderControlProps> = ({ onRecordingComplete }
         <div className="flex items-center space-x-4">
           <AudioPlayer audioData={audioData} />
           <p className="font-semibold text-green-600">Recording saved!</p>
-          <button 
-            onClick={handleReset} 
+          <button
+            type="button"
+            onClick={handleReset}
             className="p-3 rounded-full bg-base-300 text-text-muted hover:bg-opacity-80"
             aria-label="Delete and re-record"
           >

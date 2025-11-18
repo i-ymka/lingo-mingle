@@ -1,10 +1,10 @@
 import React, { useState, useMemo } from 'react';
 import { useData } from '../../contexts/DataContext';
-import type { Entry } from '../../types';
+import type { Entry, User } from '../../types';
 import AudioPlayer from '../ui/AudioPlayer';
-import { X, CloudOff } from 'lucide-react';
+import { X, CloudOff, User as UserIcon } from 'lucide-react';
 
-const WordRow: React.FC<{ entry: Entry }> = ({ entry }) => {
+const WordRow: React.FC<{ entry: Entry; user: User; userRole: 'A' | 'B' }> = ({ entry, user, userRole }) => {
     return (
         <tr className="border-b border-base-300">
             <td className="p-3 text-sm text-text-main">
@@ -21,19 +21,33 @@ const WordRow: React.FC<{ entry: Entry }> = ({ entry }) => {
                      {entry.isOffline && <span title="Pending sync"><CloudOff size={12} className="ml-1.5" /></span>}
                  </span>
             </td>
-            <td className="p-3 space-x-2 flex items-center">
-                {entry.audio_A_native && <AudioPlayer audioData={entry.audio_A_native} />}
-                {entry.audio_B_native && <AudioPlayer audioData={entry.audio_B_native} />}
+            <td className="p-3 space-x-3 flex items-center">
+                {entry.audio_A_native && (
+                    <div className="flex flex-col items-center gap-1">
+                        <AudioPlayer audioData={entry.audio_A_native} />
+                        <span className="text-xs text-text-muted">
+                            {userRole === 'A' ? 'You' : user.partnerNativeLang.name}
+                        </span>
+                    </div>
+                )}
+                {entry.audio_B_native && (
+                    <div className="flex flex-col items-center gap-1">
+                        <AudioPlayer audioData={entry.audio_B_native} />
+                        <span className="text-xs text-text-muted">
+                            {userRole === 'B' ? 'You' : user.partnerNativeLang.name}
+                        </span>
+                    </div>
+                )}
             </td>
         </tr>
     )
 }
 
 const AllWordsScreen: React.FC = () => {
-    const { entries, user } = useData();
+    const { entries, user, userRole } = useData();
     const [searchTerm, setSearchTerm] = useState('');
 
-    if (!user) return null;
+    if (!user || !userRole) return null;
 
     const filteredEntries = useMemo(() => {
         if (!searchTerm.trim()) {
@@ -82,7 +96,7 @@ const AllWordsScreen: React.FC = () => {
                     </thead>
                     <tbody className="bg-base-200 divide-y divide-base-300">
                         {filteredEntries.length > 0 ? (
-                            filteredEntries.map(entry => <WordRow key={entry.id} entry={entry} />)
+                            filteredEntries.map(entry => <WordRow key={entry.id} entry={entry} user={user} userRole={userRole} />)
                         ) : (
                             <tr>
                                 <td colSpan={3} className="p-4 text-center text-text-muted">
