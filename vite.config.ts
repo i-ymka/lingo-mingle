@@ -3,7 +3,7 @@ import fs from 'fs';
 import { defineConfig } from 'vite';
 
 export default defineConfig(({ mode }) => {
-    const base = mode === 'production' ? './' : '/';
+    const base = mode === 'production' ? '/lingo-mingle/' : '/';
 
     // HTTPS configuration for local development (allows MediaDevices API on mobile)
     const httpsConfig = mode === 'development' && fs.existsSync('.cert/localhost-key.pem')
