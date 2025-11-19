@@ -24,7 +24,7 @@ dist-ssr
 *.sw?
 
 # Development documentation (local only)
-claude.md
+claude-local.md
 
 # Environment variables
 .env.local
