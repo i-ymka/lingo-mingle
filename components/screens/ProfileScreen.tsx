@@ -13,7 +13,6 @@ const ProfileScreen: React.FC = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [displayName, setDisplayName] = useState('');
   const [nativeLangCode, setNativeLangCode] = useState('');
-  const [partnerLangCode, setPartnerLangCode] = useState('');
   const [pivotLangCode, setPivotLangCode] = useState('');
   const [partner, setPartner] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -24,7 +23,6 @@ const ProfileScreen: React.FC = () => {
     if (user) {
       setDisplayName(user.displayName);
       setNativeLangCode(user.nativeLang.code);
-      setPartnerLangCode(user.partnerNativeLang.code);
       setPivotLangCode(user.pivotLang.code);
     }
   }, [user]);
@@ -65,13 +63,11 @@ const ProfileScreen: React.FC = () => {
     setIsLoading(true);
 
     const nativeLang = LANGUAGES.find(l => l.code === nativeLangCode) as Language;
-    const partnerNativeLang = LANGUAGES.find(l => l.code === partnerLangCode) as Language;
     const pivotLang = LANGUAGES.find(l => l.code === pivotLangCode) as Language;
 
     await updateUserProfile({
       displayName,
       nativeLang,
-      partnerNativeLang,
       pivotLang
     });
 
@@ -84,7 +80,6 @@ const ProfileScreen: React.FC = () => {
     if (user) {
       setDisplayName(user.displayName);
       setNativeLangCode(user.nativeLang.code);
-      setPartnerLangCode(user.partnerNativeLang.code);
       setPivotLangCode(user.pivotLang.code);
     }
     setIsEditing(false);
@@ -132,14 +127,6 @@ const ProfileScreen: React.FC = () => {
               required
             />
             <Select
-              id="partner-lang"
-              label="Learning (Partner's Native Language)"
-              value={partnerLangCode}
-              onChange={(e) => setPartnerLangCode(e.target.value)}
-              options={languageOptions}
-              required
-            />
-            <Select
               id="pivot-lang"
               label="Shared (Pivot) Language"
               value={pivotLangCode}
@@ -178,10 +165,7 @@ const ProfileScreen: React.FC = () => {
               <strong>Native Language:</strong> {user.nativeLang.name}
             </p>
             <p className="text-sm text-text-muted">
-              <strong>Learning:</strong> {user.partnerNativeLang.name}
-            </p>
-            <p className="text-sm text-text-muted">
-              <strong>Via:</strong> {user.pivotLang.name}
+              <strong>Shared Language:</strong> {user.pivotLang.name}
             </p>
           </div>
         )}
@@ -202,7 +186,7 @@ const ProfileScreen: React.FC = () => {
               <strong>Native Language:</strong> {partner.nativeLang.name}
             </p>
             <p className="text-sm text-text-muted">
-              <strong>Learning:</strong> {partner.partnerNativeLang.name}
+              <strong>Shared Language:</strong> {partner.pivotLang.name}
             </p>
           </div>
         </div>

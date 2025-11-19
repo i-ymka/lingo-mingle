@@ -9,7 +9,6 @@ export const createUser = async (
   authId: string,
   displayName: string,
   nativeLang: Language,
-  partnerNativeLang: Language,
   pivotLang: Language
 ): Promise<User> => {
   const userRef = doc(db, 'users', authId);
@@ -18,18 +17,13 @@ export const createUser = async (
     id: authId,
     displayName,
     nativeLang,
-    partnerNativeLang,
     pivotLang,
-    pairId: undefined,
-    role: undefined,
   };
 
   try {
-    // Firestore doesn't support undefined values, so we omit them
     const firestoreData: any = {
       displayName,
       nativeLang,
-      partnerNativeLang,
       pivotLang,
       createdAt: Timestamp.now(),
       updatedAt: Timestamp.now(),
@@ -60,9 +54,8 @@ export const getUser = async (userId: string): Promise<User | null> => {
         id: userSnap.id,
         displayName: data.displayName,
         nativeLang: data.nativeLang,
-        partnerNativeLang: data.partnerNativeLang,
         pivotLang: data.pivotLang,
-        pairId: data.pairId,
+        activePairId: data.activePairId,
         role: data.role,
       };
     }
@@ -118,9 +111,8 @@ export const listenToUser = (
           id: snapshot.id,
           displayName: data.displayName,
           nativeLang: data.nativeLang,
-          partnerNativeLang: data.partnerNativeLang,
           pivotLang: data.pivotLang,
-          pairId: data.pairId,
+          activePairId: data.activePairId,
           role: data.role,
         };
         callback(user);

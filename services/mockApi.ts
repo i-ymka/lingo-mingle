@@ -16,8 +16,8 @@ const generateId = () => Math.random().toString(36).substr(2, 9);
 const generateCode = () => Math.floor(100000 + Math.random() * 900000).toString();
 
 // User Management
-export const createUser = (displayName: string, nativeLang: Language, partnerNativeLang: Language, pivotLang: Language): User => {
-  const newUser: User = { id: generateId(), displayName, nativeLang, partnerNativeLang, pivotLang };
+export const createUser = (displayName: string, nativeLang: Language, pivotLang: Language): User => {
+  const newUser: User = { id: generateId(), displayName, nativeLang, pivotLang };
   set('user', newUser);
   return newUser;
 };

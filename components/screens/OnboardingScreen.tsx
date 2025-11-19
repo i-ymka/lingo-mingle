@@ -14,7 +14,6 @@ import { User } from 'lucide-react';
 const OnboardingScreen: React.FC = () => {
   const [name, setName] = useState('');
   const [nativeLangCode, setNativeLangCode] = useState('');
-  const [partnerLangCode, setPartnerLangCode] = useState('');
   const [pivotLangCode, setPivotLangCode] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
@@ -28,10 +27,9 @@ const OnboardingScreen: React.FC = () => {
     setIsLoading(true);
     setError('');
 
-    if (name && nativeLangCode && partnerLangCode && pivotLangCode) {
+    if (name && nativeLangCode && pivotLangCode) {
       try {
         const nativeLang = LANGUAGES.find(l => l.code === nativeLangCode) as Language;
-        const partnerNativeLang = LANGUAGES.find(l => l.code === partnerLangCode) as Language;
         const pivotLang = LANGUAGES.find(l => l.code === pivotLangCode) as Language;
 
         if (useFirebase) {
@@ -47,7 +45,6 @@ const OnboardingScreen: React.FC = () => {
             authUser.uid,
             name,
             nativeLang,
-            partnerNativeLang,
             pivotLang
           );
           login(newUser);
@@ -55,7 +52,7 @@ const OnboardingScreen: React.FC = () => {
         } else {
           // localStorage
           console.log('💾 Creating user with localStorage...');
-          const newUser = createUserLocalStorage(name, nativeLang, partnerNativeLang, pivotLang);
+          const newUser = createUserLocalStorage(name, nativeLang, pivotLang);
           login(newUser);
           console.log('✅ User created in localStorage:', newUser.id);
         }
@@ -86,20 +83,13 @@ const OnboardingScreen: React.FC = () => {
           onChange={(e) => setName(e.target.value)}
           placeholder="e.g., Alex"
           required
+          icon={<User size={20} />}
         />
         <Select
           id="native-lang"
           label="Your Native Language"
           value={nativeLangCode}
           onChange={(e) => setNativeLangCode(e.target.value)}
-          options={languageOptions}
-          required
-        />
-        <Select
-          id="partner-lang"
-          label="Your Partner's Native Language"
-          value={partnerLangCode}
-          onChange={(e) => setPartnerLangCode(e.target.value)}
           options={languageOptions}
           required
         />

@@ -9,7 +9,6 @@ export interface User {
   id: string;
   displayName: string;
   nativeLang: Language;
-  partnerNativeLang: Language;
   pivotLang: Language;
   activePairId?: string; // Currently selected pair for multi-pair support
   role?: UserRole; // 'A' or 'B' - determined by position in current pair

@@ -16,7 +16,6 @@ const SignupScreen: React.FC = () => {
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
   const [nativeLangCode, setNativeLangCode] = useState('');
-  const [partnerLangCode, setPartnerLangCode] = useState('');
   const [pivotLangCode, setPivotLangCode] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
@@ -35,10 +34,9 @@ const SignupScreen: React.FC = () => {
     setIsLoading(true);
     setError('');
 
-    if (name && nativeLangCode && partnerLangCode && pivotLangCode) {
+    if (name && nativeLangCode && pivotLangCode) {
       try {
         const nativeLang = LANGUAGES.find(l => l.code === nativeLangCode) as Language;
-        const partnerNativeLang = LANGUAGES.find(l => l.code === partnerLangCode) as Language;
         const pivotLang = LANGUAGES.find(l => l.code === pivotLangCode) as Language;
 
         if (useFirebase) {
@@ -48,7 +46,6 @@ const SignupScreen: React.FC = () => {
             authUser.uid,
             name,
             nativeLang,
-            partnerNativeLang,
             pivotLang
           );
           login(newUser);
@@ -193,15 +190,6 @@ const SignupScreen: React.FC = () => {
           label="Your Native Language"
           value={nativeLangCode}
           onChange={(e) => setNativeLangCode(e.target.value)}
-          options={languageOptions}
-          required
-        />
-
-        <Select
-          id="partner-lang"
-          label="Your Partner's Native Language"
-          value={partnerLangCode}
-          onChange={(e) => setPartnerLangCode(e.target.value)}
           options={languageOptions}
           required
         />
