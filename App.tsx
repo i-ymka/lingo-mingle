@@ -2,6 +2,7 @@ import React from 'react';
 import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { DataProvider, useData } from './contexts/DataContext';
 import { ThemeProvider } from './contexts/ThemeContext';
+import { useDefaultScreen } from './hooks/useDefaultScreen';
 import SplashScreen from './components/screens/SplashScreen';
 import OnboardingScreen from './components/screens/OnboardingScreen';
 import PairingScreen from './components/screens/PairingScreen';
@@ -27,6 +28,7 @@ const App: React.FC = () => {
 
 const AppRouter: React.FC = () => {
   const { user, pair, isLoading } = useData();
+  const { defaultScreen } = useDefaultScreen();
 
   // Show loading screen while Firebase initializes
   if (isLoading) {
@@ -59,7 +61,7 @@ const AppRouter: React.FC = () => {
             </>
           ) : (
             <Route path="/" element={<MainLayout />}>
-              <Route index element={<Navigate to="/inbox" />} />
+              <Route index element={<Navigate to={`/${defaultScreen}`} />} />
               <Route path="inbox" element={<InboxScreen />} />
               <Route path="inbox/complete/:entryId" element={<CompleteWordScreen />} />
               <Route path="study" element={<StudyScreen />} />
@@ -68,7 +70,7 @@ const AppRouter: React.FC = () => {
               <Route path="stats" element={<StatsScreen />} />
               <Route path="settings" element={<SettingsScreen />} />
               <Route path="profile" element={<ProfileScreen />} />
-              <Route path="*" element={<Navigate to="/inbox" />} />
+              <Route path="*" element={<Navigate to={`/${defaultScreen}`} />} />
             </Route>
           )}
         </Routes>

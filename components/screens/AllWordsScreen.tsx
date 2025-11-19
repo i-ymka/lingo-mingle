@@ -4,22 +4,54 @@ import type { Entry, User } from '../../types';
 import AudioPlayer from '../ui/AudioPlayer';
 import { X, CloudOff, User as UserIcon } from 'lucide-react';
 
+// Helper to get color based on SRS level (0-5)
+const getSrsColor = (srsBox: number): string => {
+    const colors = [
+        '#ef4444', // 0: red (not learned)
+        '#f97316', // 1: orange
+        '#eab308', // 2: yellow
+        '#84cc16', // 3: lime
+        '#22c55e', // 4: green
+        '#10b981', // 5: emerald (mastered)
+    ];
+    return colors[Math.min(srsBox, 5)];
+};
+
+const MasteryIndicator: React.FC<{ srsBox: number; label: string }> = ({ srsBox, label }) => {
+    const color = getSrsColor(srsBox);
+    return (
+        <div className="flex flex-col items-center gap-1">
+            <div className="flex gap-0.5">
+                {[1, 2, 3, 4, 5].map((level) => (
+                    <div
+                        key={level}
+                        className="w-1 h-5 rounded-sm"
+                        style={{
+                            backgroundColor: level <= srsBox ? color : '#e5e7eb',
+                        }}
+                    />
+                ))}
+            </div>
+            <span className="text-xs text-text-muted">{label}</span>
+        </div>
+    );
+};
+
 const WordRow: React.FC<{ entry: Entry; user: User; userRole: 'A' | 'B' }> = ({ entry, user, userRole }) => {
+    const yourSrs = userRole === 'A' ? entry.srs_box_A : entry.srs_box_B;
+    const partnerSrs = userRole === 'A' ? entry.srs_box_B : entry.srs_box_A;
+
     return (
         <tr className="border-b border-base-300">
             <td className="p-3 text-sm text-text-main">
                 <p className="font-medium">{entry.text_pivot}</p>
                 <p className="text-xs text-text-muted">{entry.text_native_A}</p>
                 <p className="text-xs text-text-muted">{entry.text_native_B}</p>
-            </td>
-            <td className="p-3">
-                 <span className={`px-2 inline-flex items-center text-xs leading-5 font-semibold rounded-full ${
-                     entry.status === 'ready' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
-                 }`}>
-                     {entry.status}
-                     {/* FIX: The `title` prop is not valid on lucide-react icons. Wrapped icon in a span with a title attribute for the tooltip. */}
-                     {entry.isOffline && <span title="Pending sync"><CloudOff size={12} className="ml-1.5" /></span>}
-                 </span>
+                {entry.isOffline && (
+                    <span title="Pending sync" className="inline-flex items-center gap-1 text-xs text-yellow-600 mt-1">
+                        <CloudOff size={12} /> Offline
+                    </span>
+                )}
             </td>
             <td className="p-3 space-x-3 flex items-center">
                 {entry.audio_A_native && (
@@ -39,6 +71,12 @@ const WordRow: React.FC<{ entry: Entry; user: User; userRole: 'A' | 'B' }> = ({ 
                     </div>
                 )}
             </td>
+            <td className="p-3">
+                <div className="flex gap-4 justify-end">
+                    <MasteryIndicator srsBox={yourSrs} label="You" />
+                    <MasteryIndicator srsBox={partnerSrs} label="Partner" />
+                </div>
+            </td>
         </tr>
     )
 }
@@ -49,17 +87,22 @@ const AllWordsScreen: React.FC = () => {
 
     if (!user || !userRole) return null;
 
+    // Filter to show only ready entries (not pending)
+    const readyEntries = useMemo(() => {
+        return entries.filter(entry => entry.status === 'ready');
+    }, [entries]);
+
     const filteredEntries = useMemo(() => {
         if (!searchTerm.trim()) {
-            return entries;
+            return readyEntries;
         }
         const lowercasedFilter = searchTerm.toLowerCase().trim();
-        return entries.filter(entry =>
+        return readyEntries.filter(entry =>
             entry.text_pivot.toLowerCase().includes(lowercasedFilter) ||
             (entry.text_native_A && entry.text_native_A.toLowerCase().includes(lowercasedFilter)) ||
             (entry.text_native_B && entry.text_native_B.toLowerCase().includes(lowercasedFilter))
         );
-    }, [entries, searchTerm]);
+    }, [readyEntries, searchTerm]);
 
     return (
         <div className="p-4">
@@ -90,8 +133,8 @@ const AllWordsScreen: React.FC = () => {
                     <thead className="bg-base-300">
                         <tr>
                             <th scope="col" className="p-3 text-left text-xs font-medium text-text-muted uppercase tracking-wider">Word</th>
-                            <th scope="col" className="p-3 text-left text-xs font-medium text-text-muted uppercase tracking-wider">Status</th>
                             <th scope="col" className="p-3 text-left text-xs font-medium text-text-muted uppercase tracking-wider">Audio</th>
+                            <th scope="col" className="p-3 text-right text-xs font-medium text-text-muted uppercase tracking-wider">Mastery</th>
                         </tr>
                     </thead>
                     <tbody className="bg-base-200 divide-y divide-base-300">
