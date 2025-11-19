@@ -1,21 +1,20 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useData } from '../../contexts/DataContext';
-import { getAllUserPairs, deletePair as deletePairFirebase } from '../../services/firebaseApi';
+import { getAllUserPairs, archivePair } from '../../services/firebaseApi';
 import type { Pair } from '../../types';
 import Button from '../ui/Button';
 import Input from '../ui/Input';
-import { Users, Plus, Link as LinkIcon, Calendar, Trash2 } from 'lucide-react';
+import { Users, Plus, Link as LinkIcon, Calendar, Archive } from 'lucide-react';
 
 const PairsListScreen: React.FC = () => {
   const navigate = useNavigate();
-  const { user, loadPair, useFirebase, leavePair } = useData();
+  const { user, loadPair, useFirebase } = useData();
   const [pairs, setPairs] = useState<Pair[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showJoinModal, setShowJoinModal] = useState(false);
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [pairToDelete, setPairToDelete] = useState<string | null>(null);
   const [inviteCode, setInviteCode] = useState('');
+  const [swipedPair, setSwipedPair] = useState<string | null>(null);
 
   useEffect(() => {
     const loadPairs = async () => {
@@ -24,7 +23,8 @@ const PairsListScreen: React.FC = () => {
       if (useFirebase) {
         try {
           const userPairs = await getAllUserPairs(user.id);
-          setPairs(userPairs);
+          // Filter out archived pairs
+          setPairs(userPairs.filter(p => !p.archived));
         } catch (error) {
           console.error('Failed to load pairs:', error);
         }
@@ -49,21 +49,18 @@ const PairsListScreen: React.FC = () => {
     }
   };
 
-  const handleDeletePair = async () => {
-    if (!pairToDelete || !user) return;
+  const handleArchivePair = async (pairId: string) => {
+    if (!user) return;
 
     try {
-      await deletePairFirebase(pairToDelete, user.id);
-      // Also leave the pair if it's the active one
-      await leavePair();
-      // Reload pairs list
+      await archivePair(pairId);
+      // Reload pairs list (filter out archived)
       const userPairs = await getAllUserPairs(user.id);
-      setPairs(userPairs);
-      setShowDeleteModal(false);
-      setPairToDelete(null);
+      setPairs(userPairs.filter(p => !p.archived));
+      setSwipedPair(null);
     } catch (error) {
-      console.error('Failed to delete pair:', error);
-      alert(error instanceof Error ? error.message : 'Failed to delete pair');
+      console.error('Failed to archive pair:', error);
+      alert(error instanceof Error ? error.message : 'Failed to archive pair');
     }
   };
 
@@ -96,46 +93,32 @@ const PairsListScreen: React.FC = () => {
             const isComplete = pair.userIds[0] && pair.userIds[1];
 
             return (
-              <div
+              <button
                 key={pair.id}
-                className="w-full bg-base-200 rounded-lg p-4 shadow hover:shadow-lg transition-all border-2 border-transparent hover:border-primary"
+                onClick={() => handleSelectPair(pair.id)}
+                className="w-full bg-base-200 rounded-lg p-4 shadow hover:shadow-lg transition-all text-left border-2 border-transparent hover:border-primary"
               >
                 <div className="flex items-center justify-between">
-                  <button
-                    onClick={() => handleSelectPair(pair.id)}
-                    className="flex items-center gap-3 flex-1 text-left"
-                  >
+                  <div className="flex items-center gap-3 flex-1">
                     <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
                       <Users size={24} className="text-primary" />
                     </div>
                     <div>
                       <h3 className="font-semibold text-text-main">
-                        {isComplete ? 'Active Pair' : 'Waiting for Partner'}
+                        {isComplete ? 'Pair' : 'Waiting for Partner'}
                       </h3>
                       <p className="text-sm text-text-muted flex items-center gap-1">
                         <Calendar size={14} />
                         {new Date(pair.createdAt).toLocaleDateString()}
                       </p>
                     </div>
-                  </button>
-                  <div className="flex items-center gap-3">
-                    <div className="text-right">
-                      <p className="text-xs text-text-muted">Code</p>
-                      <p className="font-mono font-semibold text-primary">{pair.inviteCode}</p>
-                    </div>
-                    <button
-                      onClick={() => {
-                        setPairToDelete(pair.id);
-                        setShowDeleteModal(true);
-                      }}
-                      className="p-2 hover:bg-red-500/20 rounded-lg transition-colors"
-                      title="Delete pair"
-                    >
-                      <Trash2 size={20} className="text-red-500" />
-                    </button>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-xs text-text-muted">Code</p>
+                    <p className="font-mono font-semibold text-primary">{pair.inviteCode}</p>
                   </div>
                 </div>
-              </div>
+              </button>
             );
           })
         )}
@@ -159,6 +142,14 @@ const PairsListScreen: React.FC = () => {
           <LinkIcon size={20} />
           Join by Code
         </Button>
+
+        <button
+          onClick={() => navigate('/archive')}
+          className="w-full text-sm text-text-muted hover:text-text-main transition-colors flex items-center justify-center gap-1 py-2"
+        >
+          <Archive size={16} />
+          Archive
+        </button>
       </div>
 
       {/* Join by Code Modal */}
@@ -193,36 +184,6 @@ const PairsListScreen: React.FC = () => {
         </div>
       )}
 
-      {/* Delete Pair Confirmation Modal */}
-      {showDeleteModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-base-100 rounded-lg p-6 max-w-md w-full">
-            <h3 className="text-xl font-bold text-text-main mb-4">Delete Pair?</h3>
-            <p className="text-text-muted mb-6">
-              Are you sure you want to delete this pair? All words and progress will be lost.
-              This action cannot be undone.
-            </p>
-            <div className="flex gap-3">
-              <Button
-                onClick={handleDeletePair}
-                className="flex-1 bg-red-500 hover:bg-red-600"
-              >
-                Delete
-              </Button>
-              <Button
-                onClick={() => {
-                  setShowDeleteModal(false);
-                  setPairToDelete(null);
-                }}
-                variant="outline"
-                className="flex-1"
-              >
-                Cancel
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

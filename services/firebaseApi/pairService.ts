@@ -161,6 +161,7 @@ export const getPair = async (pairId: string): Promise<Pair | null> => {
         inviteCodeExpiresAt: data.inviteCodeExpiresAt ? data.inviteCodeExpiresAt.toDate().toISOString() : null,
         inviteCodeUsed: data.inviteCodeUsed || false,
         userIds: data.userIds,
+        archived: data.archived || false,
       };
     }
 
@@ -210,6 +211,7 @@ export const getAllUserPairs = async (userId: string): Promise<Pair[]> => {
         inviteCodeExpiresAt: data.inviteCodeExpiresAt ? data.inviteCodeExpiresAt.toDate().toISOString() : null,
         inviteCodeUsed: data.inviteCodeUsed || false,
         userIds: data.userIds,
+        archived: data.archived || false,
       });
     });
 
@@ -242,6 +244,7 @@ export const listenToPair = (
           inviteCodeExpiresAt: data.inviteCodeExpiresAt ? data.inviteCodeExpiresAt.toDate().toISOString() : null,
           inviteCodeUsed: data.inviteCodeUsed || false,
           userIds: data.userIds,
+          archived: data.archived || false,
         };
         callback(pair);
       } else {
@@ -253,6 +256,40 @@ export const listenToPair = (
       callback(null);
     }
   );
+};
+
+/**
+ * Archive a pair
+ */
+export const archivePair = async (pairId: string): Promise<void> => {
+  try {
+    const pairRef = doc(db, 'pairs', pairId);
+    await updateDoc(pairRef, {
+      archived: true,
+      updatedAt: Timestamp.now(),
+    });
+    console.log('✅ Pair archived:', pairId);
+  } catch (error) {
+    console.error('❌ Failed to archive pair:', error);
+    throw new Error('Failed to archive pair. Please try again.');
+  }
+};
+
+/**
+ * Unarchive a pair
+ */
+export const unarchivePair = async (pairId: string): Promise<void> => {
+  try {
+    const pairRef = doc(db, 'pairs', pairId);
+    await updateDoc(pairRef, {
+      archived: false,
+      updatedAt: Timestamp.now(),
+    });
+    console.log('✅ Pair unarchived:', pairId);
+  } catch (error) {
+    console.error('❌ Failed to unarchive pair:', error);
+    throw new Error('Failed to unarchive pair. Please try again.');
+  }
 };
 
 /**

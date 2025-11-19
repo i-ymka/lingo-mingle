@@ -21,6 +21,7 @@ export interface Pair {
   inviteCodeExpiresAt: string | null; // ISO timestamp when invite code expires (5 minutes after creation)
   inviteCodeUsed: boolean; // True if invite code has been used once
   userIds: [string, string | null];
+  archived?: boolean; // True if pair is archived
 }
 
 export type EntryStatus = 'draft' | 'waiting_partner_audio' | 'ready';
