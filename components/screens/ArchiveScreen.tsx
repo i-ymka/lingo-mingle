@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useData } from '../../contexts/DataContext';
-import { getAllUserPairs, unarchivePair, deletePair as deletePairFirebase } from '../../services/firebaseApi';
+import { getAllUserPairs, unarchivePair, deletePair as deletePairFirebase, getUser } from '../../services/firebaseApi';
 import type { Pair } from '../../types';
 import Button from '../ui/Button';
 import { Users, Calendar, Trash2, RotateCcw, ArrowLeft } from 'lucide-react';
@@ -10,6 +10,7 @@ const ArchiveScreen: React.FC = () => {
   const navigate = useNavigate();
   const { user, useFirebase } = useData();
   const [archivedPairs, setArchivedPairs] = useState<Pair[]>([]);
+  const [partnerNames, setPartnerNames] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(true);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [pairToDelete, setPairToDelete] = useState<string | null>(null);
@@ -22,7 +23,28 @@ const ArchiveScreen: React.FC = () => {
         try {
           const userPairs = await getAllUserPairs(user.id);
           // Filter only archived pairs
-          setArchivedPairs(userPairs.filter(p => p.archived));
+          const archived = userPairs.filter(p => p.archived);
+          setArchivedPairs(archived);
+
+          // Load partner names for each archived pair
+          const names: Record<string, string> = {};
+          for (const pair of archived) {
+            const partnerId = pair.userIds.find(id => id !== user.id);
+            if (partnerId) {
+              try {
+                const partner = await getUser(partnerId);
+                if (partner) {
+                  names[pair.id] = partner.displayName;
+                }
+              } catch (error) {
+                console.error('Failed to load partner name:', error);
+                names[pair.id] = 'Partner';
+              }
+            } else {
+              names[pair.id] = 'Waiting for Partner';
+            }
+          }
+          setPartnerNames(names);
         } catch (error) {
           console.error('Failed to load archived pairs:', error);
         }
@@ -111,7 +133,7 @@ const ArchiveScreen: React.FC = () => {
                     </div>
                     <div>
                       <h3 className="font-semibold text-text-main">
-                        {isComplete ? 'Pair' : 'Waiting for Partner'}
+                        {partnerNames[pair.id] || 'Loading...'}
                       </h3>
                       <p className="text-sm text-text-muted flex items-center gap-1">
                         <Calendar size={14} />

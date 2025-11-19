@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useData } from '../../contexts/DataContext';
-import { getAllUserPairs, archivePair } from '../../services/firebaseApi';
+import { getAllUserPairs, archivePair, getUser } from '../../services/firebaseApi';
 import type { Pair } from '../../types';
 import Button from '../ui/Button';
 import Input from '../ui/Input';
@@ -11,6 +11,7 @@ const PairsListScreen: React.FC = () => {
   const navigate = useNavigate();
   const { user, loadPair, useFirebase } = useData();
   const [pairs, setPairs] = useState<Pair[]>([]);
+  const [partnerNames, setPartnerNames] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(true);
   const [showJoinModal, setShowJoinModal] = useState(false);
   const [inviteCode, setInviteCode] = useState('');
@@ -26,7 +27,28 @@ const PairsListScreen: React.FC = () => {
         try {
           const userPairs = await getAllUserPairs(user.id);
           // Filter out archived pairs
-          setPairs(userPairs.filter(p => !p.archived));
+          const nonArchivedPairs = userPairs.filter(p => !p.archived);
+          setPairs(nonArchivedPairs);
+
+          // Load partner names for each pair
+          const names: Record<string, string> = {};
+          for (const pair of nonArchivedPairs) {
+            const partnerId = pair.userIds.find(id => id !== user.id);
+            if (partnerId) {
+              try {
+                const partner = await getUser(partnerId);
+                if (partner) {
+                  names[pair.id] = partner.displayName;
+                }
+              } catch (error) {
+                console.error('Failed to load partner name:', error);
+                names[pair.id] = 'Partner';
+              }
+            } else {
+              names[pair.id] = 'Waiting for Partner';
+            }
+          }
+          setPartnerNames(names);
         } catch (error) {
           console.error('Failed to load pairs:', error);
         }
@@ -165,7 +187,7 @@ const PairsListScreen: React.FC = () => {
                       </div>
                       <div>
                         <h3 className="font-semibold text-text-main">
-                          {isComplete ? 'Pair' : 'Waiting for Partner'}
+                          {partnerNames[pair.id] || 'Loading...'}
                         </h3>
                         <p className="text-sm text-text-muted flex items-center gap-1">
                           <Calendar size={14} />

@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useData } from '../../contexts/DataContext';
+import { getUser } from '../../services/firebaseApi';
 import type { Entry } from '../../types';
 import { MessageSquare, ChevronRight, PlusCircle } from 'lucide-react';
 import Button from '../ui/Button';
@@ -8,20 +9,37 @@ import Button from '../ui/Button';
 const InboxScreen: React.FC = () => {
   const { entries, userRole, user, pair } = useData();
   const navigate = useNavigate();
+  const [partnerName, setPartnerName] = useState<string>('Your Partner');
 
   if (!user || !userRole || !pair) return null;
 
   const partnerRole = userRole === 'A' ? 'B' : 'A';
   const partnerId = pair.userIds.find(id => id !== user.id);
 
-  const inboxEntries = entries.filter(entry => 
+  const inboxEntries = entries.filter(entry =>
     entry.status === 'waiting_partner_audio' && entry.createdBy !== user.id
   );
 
-  const getPartnerName = () => {
-    // This is a simplification. In a real app, you'd fetch the partner's profile.
-    return "Your Partner";
-  }
+  // Load partner's name
+  useEffect(() => {
+    const loadPartnerName = async () => {
+      if (!partnerId) {
+        setPartnerName('Waiting for Partner');
+        return;
+      }
+
+      try {
+        const partner = await getUser(partnerId);
+        if (partner) {
+          setPartnerName(partner.displayName);
+        }
+      } catch (error) {
+        console.error('Failed to load partner name:', error);
+      }
+    };
+
+    loadPartnerName();
+  }, [partnerId]);
 
   return (
     <div className="p-4 space-y-4">
@@ -50,7 +68,7 @@ const InboxScreen: React.FC = () => {
               >
                 <div>
                   <p className="font-semibold text-lg text-text-main">{entry.text_pivot}</p>
-                  <p className="text-sm text-text-muted">Added by {getPartnerName()}</p>
+                  <p className="text-sm text-text-muted">Added by {partnerName}</p>
                 </div>
                 <ChevronRight size={20} className="text-text-muted" />
               </button>
