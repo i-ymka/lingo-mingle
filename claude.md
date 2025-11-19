@@ -1807,4 +1807,99 @@ ngrok http 5173
 
 ---
 
-**Последнее обновление:** 2025-11-18 09:35 (Phase 2 Testing Complete - All Tests Passing ✅)
+**Последнее обновление:** 2025-11-19 03:07 (Production deployment fixes and optimizations ✅)
+
+---
+
+## 📋 Последние изменения
+
+### 2025-11-19 - Production Deployment & Path Fixes
+
+**03:30 - Fix GitHub Pages white screen (commit a4e77ff) ⚡ CRITICAL FIX**
+- **Проблема:** Белый экран на GitHub Pages, даже в приватном окне браузера
+- **Причина:** Абсолютные пути в index.html (`src="/index.tsx"`) не работают с GitHub Pages subfolder
+- **Анализ:**
+  - `src="/index.tsx"` → загружает `https://ymka239.github.io/index.tsx` ❌
+  - `src="./index.tsx"` → загружает `https://ymka239.github.io/lingo-mingle/index.tsx` ✅
+- **Решение:**
+  - Изменены ВСЕ пути в index.html на относительные (с `./`)
+  - Строка 65: `<link rel="stylesheet" href="./index.css">`
+  - Строка 69: `<script type="module" src="./index.tsx"></script>`
+  - Строки 5, 6, 11: пути к иконкам и manifest
+  - Vite при build автоматически добавляет `/lingo-mingle/` к bundled файлам
+- **Результат:**
+  - Build создает: `<script src="/lingo-mingle/assets/index-DiU2JUgL.js"></script>` ✅
+  - Приложение загружается корректно на GitHub Pages
+- **Статус:** ✅ ИСПРАВЛЕНО
+
+**03:07 - Fix GitHub Pages base path (commit 8554137)**
+- **Проблема:** После деплоя на GitHub Pages приложение показывало пустую страницу или неправильно загружало ресурсы
+- **Причина:** Неправильная конфигурация base path в vite.config.ts для GitHub Pages субдомена
+- **Решение:** Обновлен base path в vite.config.ts
+- **Статус:** ✅ ИСПРАВЛЕНО (но требовался дополнительный фикс index.html)
+
+**Предыдущие коммиты:**
+- ✅ Fix Phase 2 testing issues and add loading state (51c058f)
+  - Добавлены loading states для предотвращения race conditions
+  - Исправлены проблемы с тестированием Firebase интеграции
+
+- ✅ Implement Firebase Phase 2: Complete integration with all screens (e275bfe)
+  - Полная интеграция Firebase во все экраны приложения
+  - Real-time синхронизация между устройствами работает
+
+- ✅ Add Firebase integration tests and Phase 2 detailed plan (43d2b6a)
+  - Добавлен тестовый фреймворк для Firebase
+  - Детальный план для Phase 2
+
+- ✅ Add Firebase backend integration setup (Phase 0-1) (11bd059)
+  - Установка Firebase SDK
+  - Создание базовых сервисов (auth, user, pair)
+
+### Текущий статус проекта
+
+**Завершенные фазы:**
+- ✅ Phase 0-1: Firebase Setup & Basic Services
+- ✅ Phase 2: Firebase Integration with all screens
+- ✅ Phase 2 Testing: Complete testing on two devices
+
+**В процессе:**
+- ⏳ Phase 3: Audio Storage Migration (Base64 → Firebase Storage)
+- ⏳ Phase 4: Production Security Rules
+- ⏳ Phase 5: Final Testing & Production Deploy
+
+**Текущие метрики:**
+- **TypeScript файлов:** 35
+  - 13 .ts файлов (сервисы, конфиги, типы)
+  - 22 .tsx файлов (компоненты и экраны)
+- **React компонентов:** 18
+- **Firebase сервисов:** 4 (authService, userService, pairService, entryService)
+- **Экранов приложения:** 12
+- **UI компонентов:** 6
+
+**Deployment:**
+- **GitHub Pages URL:** https://ymka239.github.io/lingo-mingle/
+- **Статус:** ✅ Deployed and working
+- **Автодеплой:** Настроен через GitHub Actions (.github/workflows/deploy.yml)
+- **Firebase Mode:** Enabled (VITE_USE_FIREBASE=true)
+
+**Firebase Configuration:**
+- **Project ID:** lingo-mingle
+- **Firestore:** Test mode (30 дней)
+- **Storage:** Test mode (30 дней) - Blaze plan
+- **Authentication:** Anonymous enabled
+- **Real-time listeners:** 3 (user, pair, entries)
+
+**Известные ограничения:**
+1. Аудио хранится как Base64 в Firestore (ожидает Phase 3 миграция на Storage)
+2. Security rules в test mode (ожидает Phase 4)
+3. Bundle size ~500KB (рекомендуется оптимизация через code-splitting)
+
+**Следующие задачи:**
+1. Phase 3: Миграция аудио на Firebase Storage
+2. Phase 4: Настройка production security rules для Firestore и Storage
+3. Phase 5: Финальное тестирование и production deployment
+4. Bundle size optimization (lazy loading, code splitting)
+
+---
+
+**Последнее обновление:** 2025-11-19 03:07 (Production deployment fixes and optimizations ✅)
