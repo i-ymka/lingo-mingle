@@ -6,6 +6,7 @@ import { useDefaultScreen } from './hooks/useDefaultScreen';
 import SplashScreen from './components/screens/SplashScreen';
 import OnboardingScreen from './components/screens/OnboardingScreen';
 import PairingScreen from './components/screens/PairingScreen';
+import PairsListScreen from './components/screens/PairsListScreen';
 import MainLayout from './components/screens/MainLayout';
 import InboxScreen from './components/screens/InboxScreen';
 import StudyScreen from './components/screens/StudyScreen';
@@ -56,8 +57,9 @@ const AppRouter: React.FC = () => {
             </>
           ) : !pair ? (
             <>
+              <Route path="/pairs" element={<PairsListScreen />} />
               <Route path="/pairing" element={<PairingScreen />} />
-              <Route path="*" element={<Navigate to="/pairing" />} />
+              <Route path="*" element={<Navigate to="/pairs" />} />
             </>
           ) : (
             <Route path="/" element={<MainLayout />}>

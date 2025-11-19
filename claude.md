@@ -1855,6 +1855,238 @@ ngrok http 5173
   - Установка Firebase SDK
   - Создание базовых сервисов (auth, user, pair)
 
+### 2025-11-19 - New Features & Multi-Pair Architecture 🚀
+
+**Commit: ec2bce0 - Add new features: audio fix, mastery indicators, partner info, default screen**
+
+**1. ⚡ CRITICAL FIX: Audio playback (AudioPlayer.tsx)**
+- **Проблема:**
+  - Звук не воспроизводился при нажатии на play
+  - Кнопка play/pause не синхронизировалась с реальным воспроизведением
+  - Можно было запустить несколько аудио одновременно
+  - Кнопка не возвращалась в состояние play после окончания
+- **Причина:** `audio.play()` возвращает Promise, который не обрабатывался, setState вызывался ДО начала воспроизведения
+- **Решение:**
+  - Добавлен глобальный audio manager для управления одновременным воспроизведением
+  - Используется `async/await` для `play()`
+  - Добавлены event listeners: `onplay`, `onpause`, `onended`, `onerror`
+  - Состояние синхронизируется с реальным состоянием плеера через события
+  - При запуске нового аудио - предыдущее автоматически останавливается
+- **Файл:** `components/ui/AudioPlayer.tsx`
+- **Статус:** ✅ ИСПРАВЛЕНО
+
+**2. ✨ Words Screen Improvements (AllWordsScreen.tsx)**
+- **Изменения:**
+  - Фильтрация: показываются только слова со статусом `ready` (pending остаются в Inbox)
+  - Убрана колонка "Status" (больше не нужна, т.к. все слова ready)
+  - Добавлены индикаторы выученности (Mastery Indicators) для обоих пользователей
+- **Mastery Indicators:**
+  - 5 вертикальных полосок (соответствуют SRS уровням 0-5)
+  - Цветовой градиент от красного (0 - не выучено) до зеленого (5 - освоено)
+  - Два индикатора: "You" и "Partner" - показывают прогресс обоих
+  - Компактный дизайн, не занимает много места
+- **Цвета по уровням:**
+  - 0: #ef4444 (красный)
+  - 1: #f97316 (оранжевый)
+  - 2: #eab308 (желтый)
+  - 3: #84cc16 (лайм)
+  - 4: #22c55e (зеленый)
+  - 5: #10b981 (изумрудный)
+- **Файл:** `components/screens/AllWordsScreen.tsx`
+- **Статус:** ✅ ГОТОВО
+
+**3. 📊 Partner Information in Profile (ProfileScreen.tsx)**
+- **Добавлено:**
+  - Секция "Partner" с информацией о языковом партнере
+    - Имя партнера
+    - Родной язык партнера
+    - Что изучает партнер
+  - Секция "Pair Statistics"
+    - Дата создания пары
+    - Общее количество слов
+    - Количество ready слов
+    - Invite code пары (можно скопировать)
+  - Загрузка информации о партнере через Firebase API
+- **Технические детали:**
+  - Используется `getUser(partnerId)` для получения данных партнера
+  - partnerId определяется из `pair.userIds`
+  - Работает только в Firebase mode (useFirebase = true)
+- **Файл:** `components/screens/ProfileScreen.tsx`
+- **Статус:** ✅ ГОТОВО
+
+**4. 🏠 Default Screen Selection (SettingsScreen.tsx + hooks/useDefaultScreen.ts)**
+- **Новая функция:** Пользователь может выбрать какой экран открывается при запуске приложения
+- **Варианты:**
+  - Inbox (по умолчанию)
+  - Study
+  - Add Word
+  - All Words
+  - Statistics
+- **Реализация:**
+  - Новый хук `useDefaultScreen` для управления настройкой
+  - Сохранение в localStorage (ключ: `lingo-mingle-default-screen`)
+  - UI с иконками и галочками в Settings
+  - App.tsx использует `defaultScreen` для Navigate routes
+- **Файлы:**
+  - `hooks/useDefaultScreen.ts` (новый)
+  - `components/screens/SettingsScreen.tsx`
+  - `App.tsx`
+- **Статус:** ✅ ГОТОВО
+
+**Commit: 0f3ab3b - Add pull-to-refresh gesture for mobile**
+
+**5. 📱 Pull-to-Refresh для Mobile PWA**
+- **Функция:** Жест "потянуть вниз" для обновления данных на мобильных устройствах
+- **Реализация:**
+  - Новый хук `usePullToRefresh` для отслеживания touch жестов
+    - Активируется только когда `scrollY === 0` (вверху страницы)
+    - Отслеживает touchstart, touchmove, touchend
+    - Применяет эффект сопротивления (resistance effect)
+    - Threshold по умолчанию: 80px
+  - Визуальный компонент `PullToRefreshIndicator`
+    - Показывает иконку RefreshCw от Lucide
+    - Opacity transitions в зависимости от pull distance
+    - Анимация вращения при refreshing
+  - Метод `refreshAll()` в DataContext
+    - Перезагружает user, pair, entries из Firebase/localStorage
+    - Использует `Promise.all` для параллельной загрузки
+  - Интеграция в MainLayout
+- **Технические детали:**
+  - `requestAnimationFrame` для плавной отрисовки
+  - `preventDefault` для предотвращения scroll во время pull
+  - Passive event listeners где возможно (производительность)
+  - Работает только на touch устройствах
+- **Файлы:**
+  - `hooks/usePullToRefresh.ts` (новый)
+  - `components/ui/PullToRefresh.tsx` (новый)
+  - `contexts/DataContext.tsx` (добавлен метод refreshAll)
+  - `components/screens/MainLayout.tsx`
+- **Статус:** ✅ ГОТОВО
+
+**Commit: 6a85607 - Fix GitHub Pages white screen: add Firebase env variables to workflow**
+
+**6. 🔥 Firebase Environment Variables in GitHub Actions**
+- **Проблема:** GitHub Pages показывал белый экран даже после фикса путей
+- **Причина:** GitHub Actions собирал проект БЕЗ Firebase credentials
+  - Все `import.meta.env.VITE_FIREBASE_*` были `undefined`
+  - Firebase не инициализировался
+  - Приложение зависало на Loading screen
+- **Решение:**
+  - Добавлены Firebase env variables в `.github/workflows/deploy.yml`
+  - Переменные добавлены напрямую в step "Build" (не через secrets, т.к. это публичные данные)
+  - Firebase API keys безопасны для публичных клиентских приложений (security через Firestore Rules)
+- **Переменные:**
+  - VITE_FIREBASE_API_KEY
+  - VITE_FIREBASE_AUTH_DOMAIN
+  - VITE_FIREBASE_PROJECT_ID
+  - VITE_FIREBASE_STORAGE_BUCKET
+  - VITE_FIREBASE_MESSAGING_SENDER_ID
+  - VITE_FIREBASE_APP_ID
+  - VITE_USE_FIREBASE=true
+- **Файл:** `.github/workflows/deploy.yml`
+- **Статус:** ✅ ИСПРАВЛЕНО
+
+**Commit: 8f6f6f9 - WIP: Multi-pair support - architecture refactoring (Part 1)**
+**Commit: [pending] - Complete multi-pair support (Part 2)**
+
+**7. 🔗 Multi-Pair Support - Архитектурный рефакторинг ⚡ MAJOR FEATURE**
+
+**Мотивация:**
+- Пользователь может учить разные языки с разными людьми
+- Удобно для тестирования (не нужно создавать новые аккаунты)
+- Возможность учить языки с друзьями, коллегами, семьей одновременно
+
+**Архитектурные изменения:**
+
+*До:*
+```typescript
+User {
+  pairId?: string  // ОДНА пара
+  role?: UserRole
+}
+```
+
+*После:*
+```typescript
+User {
+  activePairId?: string  // Текущая выбранная пара
+  role?: UserRole        // Роль в текущей паре
+}
+```
+
+**Новые компоненты и функции:**
+
+1. **PairsListScreen** (новый экран)
+   - Показывает все пары пользователя
+   - Карточки пар с информацией:
+     - Статус (Active Pair / Waiting for Partner)
+     - Дата создания
+     - Invite code
+   - Кнопки:
+     - "Create New Pair" → переход на /pairing
+     - "Join by Code" → модальное окно для ввода кода
+   - UI: Grid layout с красивыми карточками, иконками Users от Lucide
+   - Файл: `components/screens/PairsListScreen.tsx`
+
+2. **getAllUserPairs()** в Firebase API
+   - Firestore query: `where('userIds', 'array-contains', userId)`
+   - Возвращает массив всех пар где участвует пользователь
+   - Файл: `services/firebaseApi/pairService.ts`
+
+3. **leavePair()** метод в DataContext
+   - Очищает `activePairId` и `role` у пользователя
+   - Очищает локальное состояние: pair, entries, userRole
+   - Не удаляет пару (можно вернуться по invite code)
+   - Файл: `contexts/DataContext.tsx`
+
+4. **Leave Pair UI в Settings**
+   - Секция "Current Pair" внизу Settings
+   - Красная кнопка "Leave Pair" с иконкой LogOut
+   - Модальное окно подтверждения:
+     - Показывает invite code для возврата
+     - Кнопки: Leave Pair (красная) / Cancel
+   - Файл: `components/screens/SettingsScreen.tsx`
+
+**Обновленная логика routing (App.tsx):**
+```
+!user → Splash/Onboarding
+user && !pair → PairsListScreen или PairingScreen
+  └─ /pairs (default) → список пар
+  └─ /pairing → создание новой пары
+user && pair → MainLayout
+  └─ все экраны приложения
+```
+
+**User Flow:**
+1. User логинится → DataContext проверяет `activePairId`
+2. Если `activePairId` есть → загружается pair → MainLayout
+3. Если `activePairId` нет → PairsListScreen
+4. На PairsListScreen:
+   - Если пар 0 → показать кнопки Create/Join
+   - Если есть пары → список с возможностью выбрать
+5. Click на пару → `loadPair(pairId)` → устанавливается `activePairId` → MainLayout
+6. В Settings есть кнопка Leave Pair → возврат к PairsListScreen
+
+**Технические детали:**
+- Все ссылки на `user.pairId` заменены на `user.activePairId`
+- DataContext обновлен для работы с activePairId
+- Добавлен метод `leavePair()` в DataContext
+- Firebase updateUser теперь обновляет `activePairId` вместо `pairId`
+- mockApi (localStorage) также обновлен для совместимости
+
+**Файлы изменены:**
+- `types.ts` - User.pairId → User.activePairId
+- `components/screens/PairsListScreen.tsx` (новый)
+- `services/firebaseApi/pairService.ts` - добавлен getAllUserPairs()
+- `contexts/DataContext.tsx` - обновлены все ссылки на pairId, добавлен leavePair()
+- `App.tsx` - добавлен роутинг для /pairs
+- `components/screens/SettingsScreen.tsx` - добавлена секция Leave Pair
+- `services/mockApi.ts` - добавлен getUser() для совместимости
+
+**Статус:** ✅ ГОТОВО
+
+**Bundle size после изменений:** 1,170.39 kB (рост на ~10 kB из-за новых компонентов)
+
 ### Текущий статус проекта
 
 **Завершенные фазы:**

@@ -12,6 +12,7 @@ interface DataContextType {
   login: (user: User) => void;
   logout: () => void;
   loadPair: (pairId: string) => void;
+  leavePair: () => Promise<void>;
   reloadEntries: () => void;
   refreshAll: () => Promise<void>;
   userRole: UserRole | null;
@@ -249,8 +250,8 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       if (currentPair && user) {
         setPair(currentPair);
 
-        // Update user with pairId
-        await firebaseApi.updateUser(user.id, { pairId: currentPair.id });
+        // Update user with activePairId
+        await firebaseApi.updateUser(user.id, { activePairId: currentPair.id });
 
         // Determine role
         const role = currentPair.userIds[0] === user.id ? 'A' : 'B';
@@ -268,13 +269,28 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       const currentPair = api.getPair(pairId);
       if (currentPair && user) {
         setPair(currentPair);
-        api.updateUser({ ...user, pairId: currentPair.id });
+        api.updateUser({ ...user, activePairId: currentPair.id });
         reloadEntries();
         const role = currentPair.userIds[0] === user.id ? 'A' : 'B';
         setUserRole(role);
-        api.updateUser({ ...user, pairId: currentPair.id, role: role });
+        api.updateUser({ ...user, activePairId: currentPair.id, role: role });
       }
     }
+  };
+
+  const leavePair = async () => {
+    if (useFirebase && user) {
+      // Firebase: Clear activePairId
+      await firebaseApi.updateUser(user.id, { activePairId: undefined, role: undefined });
+    } else if (user) {
+      // localStorage: Clear activePairId
+      api.updateUser({ ...user, activePairId: undefined, role: undefined });
+    }
+
+    // Clear local state
+    setPair(null);
+    setEntries([]);
+    setUserRole(null);
   };
 
   const updateUserProfile = async (updates: Partial<User>) => {
@@ -323,6 +339,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     login,
     logout,
     loadPair,
+    leavePair,
     reloadEntries,
     refreshAll,
     userRole,

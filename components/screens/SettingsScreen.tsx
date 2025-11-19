@@ -1,8 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useDefaultScreen, type DefaultScreen } from '../../hooks/useDefaultScreen';
+import { useData } from '../../contexts/DataContext';
 import type { ThemeName } from '../../types';
-import { CheckCircle, Home, Inbox, BookOpen, Plus, BarChart2 } from 'lucide-react';
+import { CheckCircle, Home, Inbox, BookOpen, Plus, BarChart2, LogOut } from 'lucide-react';
+import Button from '../ui/Button';
 
 interface ThemeOption {
     id: ThemeName;
@@ -54,6 +56,13 @@ const defaultScreenOptions: DefaultScreenOption[] = [
 const SettingsScreen: React.FC = () => {
     const { theme: activeTheme, setTheme } = useTheme();
     const { defaultScreen, setDefaultScreen } = useDefaultScreen();
+    const { pair, leavePair } = useData();
+    const [showLeaveConfirm, setShowLeaveConfirm] = useState(false);
+
+    const handleLeavePair = async () => {
+        await leavePair();
+        setShowLeaveConfirm(false);
+    };
 
     return (
         <div className="p-4 space-y-6">
@@ -112,6 +121,54 @@ const SettingsScreen: React.FC = () => {
                     ))}
                 </div>
             </div>
+
+            {/* Leave Pair Section */}
+            {pair && (
+                <div className="space-y-2 pt-4 border-t border-base-300">
+                    <h3 className="text-lg font-semibold text-text-main">Current Pair</h3>
+                    <p className="text-sm text-text-muted mb-3">
+                        Leave this pair to switch to another or create a new one. Your progress will be saved.
+                    </p>
+                    <Button
+                        onClick={() => setShowLeaveConfirm(true)}
+                        variant="outline"
+                        className="w-full flex items-center justify-center gap-2 text-red-600 border-red-600 hover:bg-red-50"
+                    >
+                        <LogOut size={20} />
+                        Leave Pair
+                    </Button>
+                </div>
+            )}
+
+            {/* Leave Pair Confirmation Modal */}
+            {showLeaveConfirm && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+                    <div className="bg-base-100 rounded-lg p-6 max-w-md w-full">
+                        <h3 className="text-xl font-bold text-text-main mb-4">Leave This Pair?</h3>
+                        <p className="text-text-muted mb-6">
+                            You'll return to the pairs list. You can rejoin this pair anytime using the invite code:{' '}
+                            <code className="bg-base-300 px-2 py-1 rounded font-mono font-semibold">
+                                {pair?.inviteCode}
+                            </code>
+                        </p>
+                        <div className="flex gap-3">
+                            <Button
+                                onClick={handleLeavePair}
+                                className="flex-1 bg-red-600 hover:bg-red-700"
+                            >
+                                Leave Pair
+                            </Button>
+                            <Button
+                                onClick={() => setShowLeaveConfirm(false)}
+                                variant="outline"
+                                className="flex-1"
+                            >
+                                Cancel
+                            </Button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

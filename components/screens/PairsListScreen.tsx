@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useData } from '../../contexts/DataContext';
 import { getAllUserPairs } from '../../services/firebaseApi';
 import type { Pair } from '../../types';
@@ -7,6 +8,7 @@ import Input from '../ui/Input';
 import { Users, Plus, Link as LinkIcon, Calendar } from 'lucide-react';
 
 const PairsListScreen: React.FC = () => {
+  const navigate = useNavigate();
   const { user, loadPair, useFirebase } = useData();
   const [pairs, setPairs] = useState<Pair[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -108,14 +110,7 @@ const PairsListScreen: React.FC = () => {
       {/* Action Buttons */}
       <div className="space-y-3">
         <Button
-          onClick={() => {
-            // Create new pair - this will navigate to PairingScreen
-            // We need to clear activePairId first
-            if (user && useFirebase) {
-              // Set activePairId to undefined to trigger PairingScreen
-              loadPair(''); // Empty string signals "create new"
-            }
-          }}
+          onClick={() => navigate('/pairing')}
           className="w-full flex items-center justify-center gap-2"
         >
           <Plus size={20} />
