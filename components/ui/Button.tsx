@@ -8,6 +8,7 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 const Button: React.FC<ButtonProps> = ({ children, variant = 'primary', className = '', ...props }) => {
   const baseClasses = [
     'w-full',
+    'flex items-center justify-center gap-2',
     'font-semibold',
     'text-lg',
     'py-4 px-6',
