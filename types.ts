@@ -9,7 +9,6 @@ export interface User {
   id: string;
   displayName: string;
   nativeLang: Language;
-  partnerNativeLang: Language;
   pivotLang: Language;
   activePairId?: string; // Currently selected pair for multi-pair support
   role?: UserRole; // 'A' or 'B' - determined by position in current pair
@@ -19,6 +18,8 @@ export interface Pair {
   id: string;
   createdAt: string;
   inviteCode: string;
+  inviteCodeExpiresAt: string | null; // ISO timestamp when invite code expires (5 minutes after creation)
+  inviteCodeUsed: boolean; // True if invite code has been used once
   userIds: [string, string | null];
 }
 
