@@ -1813,13 +1813,30 @@ ngrok http 5173
 
 ## 📋 Последние изменения
 
-### 2025-11-19 - Production Deployment & Base Path Fix
+### 2025-11-19 - Production Deployment & Path Fixes
+
+**03:30 - Fix GitHub Pages white screen (commit a4e77ff) ⚡ CRITICAL FIX**
+- **Проблема:** Белый экран на GitHub Pages, даже в приватном окне браузера
+- **Причина:** Абсолютные пути в index.html (`src="/index.tsx"`) не работают с GitHub Pages subfolder
+- **Анализ:**
+  - `src="/index.tsx"` → загружает `https://ymka239.github.io/index.tsx` ❌
+  - `src="./index.tsx"` → загружает `https://ymka239.github.io/lingo-mingle/index.tsx` ✅
+- **Решение:**
+  - Изменены ВСЕ пути в index.html на относительные (с `./`)
+  - Строка 65: `<link rel="stylesheet" href="./index.css">`
+  - Строка 69: `<script type="module" src="./index.tsx"></script>`
+  - Строки 5, 6, 11: пути к иконкам и manifest
+  - Vite при build автоматически добавляет `/lingo-mingle/` к bundled файлам
+- **Результат:**
+  - Build создает: `<script src="/lingo-mingle/assets/index-DiU2JUgL.js"></script>` ✅
+  - Приложение загружается корректно на GitHub Pages
+- **Статус:** ✅ ИСПРАВЛЕНО
 
 **03:07 - Fix GitHub Pages base path (commit 8554137)**
 - **Проблема:** После деплоя на GitHub Pages приложение показывало пустую страницу или неправильно загружало ресурсы
 - **Причина:** Неправильная конфигурация base path в vite.config.ts для GitHub Pages субдомена
 - **Решение:** Обновлен base path в vite.config.ts
-- **Статус:** ✅ ИСПРАВЛЕНО
+- **Статус:** ✅ ИСПРАВЛЕНО (но требовался дополнительный фикс index.html)
 
 **Предыдущие коммиты:**
 - ✅ Fix Phase 2 testing issues and add loading state (51c058f)
