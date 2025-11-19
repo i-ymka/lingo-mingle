@@ -53,4 +53,4 @@ export interface Entry {
 
 export type SrsDecision = 'know' | 'unsure' | 'dont_know';
 
-export type ThemeName = 'light' | 'dark' | 'system';
+export type ThemeName = 'meadow' | 'daybreak' | 'twilight' | 'forest' | 'auto';

@@ -48,7 +48,7 @@ const AppRouter: React.FC = () => {
   }
 
   // Check if user has completed their profile
-  const hasCompletedProfile = user?.displayName && user?.nativeLang && user?.partnerNativeLang && user?.pivotLang;
+  const hasCompletedProfile = user?.displayName && user?.nativeLang && user?.pivotLang;
 
   return (
     <div className="h-screen w-screen max-w-md mx-auto bg-base-100 text-text-main font-sans flex flex-col shadow-2xl">
