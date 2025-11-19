@@ -225,14 +225,9 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setUnsubscribeFunctions([]);
 
     if (useFirebase) {
-      // Firebase: Sign out
-      // Note: Firebase auth doesn't have a sign out method for anonymous users
-      // They will auto sign-in again on next page load
-      // For now, just clear local state
-      setUser(null);
-      setPair(null);
-      setEntries([]);
-      setUserRole(null);
+      // Firebase: Sign out from Firebase Auth
+      await firebaseAuth.signOut();
+      // Auth state listener will clear local state automatically
     } else {
       // localStorage
       api.clearAllData();

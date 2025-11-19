@@ -2,13 +2,14 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useData } from '../../contexts/DataContext';
 import { createUser as createUserLocalStorage } from '../../services/mockApi';
-import { signInAnonymously } from '../../services/authService';
+import { getCurrentAuthUser } from '../../services/authService';
 import { createUser as createUserFirebase } from '../../services/firebaseApi';
 import { LANGUAGES } from '../../constants';
 import type { Language } from '../../types';
 import Button from '../ui/Button';
 import Input from '../ui/Input';
 import Select from '../ui/Select';
+import { User } from 'lucide-react';
 
 const OnboardingScreen: React.FC = () => {
   const [name, setName] = useState('');
@@ -34,9 +35,14 @@ const OnboardingScreen: React.FC = () => {
         const pivotLang = LANGUAGES.find(l => l.code === pivotLangCode) as Language;
 
         if (useFirebase) {
-          // Firebase: Sign in anonymously, then create user in Firestore
-          console.log('🔥 Creating user with Firebase...');
-          const authUser = await signInAnonymously();
+          // Firebase: Use current authenticated user (from email/Google auth)
+          console.log('🔥 Creating user profile with Firebase...');
+          const authUser = getCurrentAuthUser();
+
+          if (!authUser) {
+            throw new Error('No authenticated user found. Please sign in first.');
+          }
+
           const newUser = await createUserFirebase(
             authUser.uid,
             name,
@@ -45,7 +51,7 @@ const OnboardingScreen: React.FC = () => {
             pivotLang
           );
           login(newUser);
-          console.log('✅ User created in Firebase:', newUser.id);
+          console.log('✅ User profile created in Firebase:', newUser.id);
         } else {
           // localStorage
           console.log('💾 Creating user with localStorage...');
@@ -54,9 +60,9 @@ const OnboardingScreen: React.FC = () => {
           console.log('✅ User created in localStorage:', newUser.id);
         }
 
-        navigate('/pairing');
+        navigate('/pairs');
       } catch (err) {
-        console.error('❌ Failed to create user:', err);
+        console.error('❌ Failed to create user profile:', err);
         // Show detailed error message for debugging
         const errorMessage = err instanceof Error ? err.message : 'Unknown error';
         console.error('❌ Error details:', errorMessage);
@@ -69,8 +75,8 @@ const OnboardingScreen: React.FC = () => {
 
   return (
     <div className="flex flex-col h-full p-6 bg-base-100">
-      <h1 className="text-3xl font-bold text-text-main mb-2">Welcome to Lingo Mingle!</h1>
-      <p className="text-text-muted mb-8">Let's set up your language profile.</p>
+      <h1 className="text-3xl font-bold text-text-main mb-2">Complete Your Profile</h1>
+      <p className="text-text-muted mb-8">Tell us about your language learning goals.</p>
 
       <form onSubmit={handleSubmit} className="flex flex-col flex-grow space-y-6">
         <Input
