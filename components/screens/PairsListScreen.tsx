@@ -15,6 +15,8 @@ const PairsListScreen: React.FC = () => {
   const [showJoinModal, setShowJoinModal] = useState(false);
   const [inviteCode, setInviteCode] = useState('');
   const [swipedPair, setSwipedPair] = useState<string | null>(null);
+  const [touchStart, setTouchStart] = useState<{ x: number; y: number } | null>(null);
+  const [touchEnd, setTouchEnd] = useState<{ x: number; y: number } | null>(null);
 
   useEffect(() => {
     const loadPairs = async () => {
@@ -64,6 +66,40 @@ const PairsListScreen: React.FC = () => {
     }
   };
 
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setTouchEnd(null);
+    setTouchStart({
+      x: e.targetTouches[0].clientX,
+      y: e.targetTouches[0].clientY
+    });
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    setTouchEnd({
+      x: e.targetTouches[0].clientX,
+      y: e.targetTouches[0].clientY
+    });
+  };
+
+  const handleTouchEnd = (pairId: string) => {
+    if (!touchStart || !touchEnd) return;
+
+    const deltaX = touchStart.x - touchEnd.x;
+    const deltaY = touchStart.y - touchEnd.y;
+    const minSwipeDistance = 50;
+
+    // Swipe left detected (deltaX positive means left swipe)
+    if (deltaX > minSwipeDistance && Math.abs(deltaY) < 100) {
+      setSwipedPair(pairId);
+    } else if (deltaX < -minSwipeDistance) {
+      // Swipe right - cancel
+      setSwipedPair(null);
+    }
+
+    setTouchStart(null);
+    setTouchEnd(null);
+  };
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-full">
@@ -91,34 +127,59 @@ const PairsListScreen: React.FC = () => {
           pairs.map((pair) => {
             const partnerId = pair.userIds.find(id => id !== user?.id);
             const isComplete = pair.userIds[0] && pair.userIds[1];
+            const isSwiped = swipedPair === pair.id;
 
             return (
-              <button
+              <div
                 key={pair.id}
-                onClick={() => handleSelectPair(pair.id)}
-                className="w-full bg-base-200 rounded-lg p-4 shadow hover:shadow-lg transition-all text-left border-2 border-transparent hover:border-primary"
+                className="relative overflow-hidden"
+                onTouchStart={handleTouchStart}
+                onTouchMove={handleTouchMove}
+                onTouchEnd={() => handleTouchEnd(pair.id)}
               >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3 flex-1">
-                    <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
-                      <Users size={24} className="text-primary" />
+                {/* Archive button revealed on swipe */}
+                {isSwiped && (
+                  <div className="absolute right-0 top-0 bottom-0 flex items-center bg-red-500 px-6 rounded-r-lg">
+                    <button
+                      onClick={() => handleArchivePair(pair.id)}
+                      className="text-white font-semibold flex items-center gap-2"
+                    >
+                      <Archive size={20} />
+                      Archive
+                    </button>
+                  </div>
+                )}
+
+                {/* Pair card */}
+                <button
+                  onClick={() => !isSwiped && handleSelectPair(pair.id)}
+                  className={`w-full bg-base-200 rounded-lg p-4 shadow hover:shadow-lg transition-all text-left border-2 border-transparent hover:border-primary ${
+                    isSwiped ? 'translate-x-[-120px]' : ''
+                  }`}
+                  style={{ transition: 'transform 0.3s ease' }}
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3 flex-1">
+                      <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
+                        <Users size={24} className="text-primary" />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-text-main">
+                          {isComplete ? 'Pair' : 'Waiting for Partner'}
+                        </h3>
+                        <p className="text-sm text-text-muted flex items-center gap-1">
+                          <Calendar size={14} />
+                          {new Date(pair.createdAt).toLocaleDateString()}
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <h3 className="font-semibold text-text-main">
-                        {isComplete ? 'Pair' : 'Waiting for Partner'}
-                      </h3>
-                      <p className="text-sm text-text-muted flex items-center gap-1">
-                        <Calendar size={14} />
-                        {new Date(pair.createdAt).toLocaleDateString()}
-                      </p>
+                    <div className="text-right">
+                      <p className="text-xs text-text-muted">Code</p>
+                      <p className="font-mono font-semibold text-primary">{pair.inviteCode}</p>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <p className="text-xs text-text-muted">Code</p>
-                    <p className="font-mono font-semibold text-primary">{pair.inviteCode}</p>
-                  </div>
-                </div>
-              </button>
+                </button>
+              </div>
             );
           })
         )}

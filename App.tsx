@@ -18,6 +18,7 @@ import AllWordsScreen from './components/screens/AllWordsScreen';
 import CompleteWordScreen from './components/screens/CompleteWordScreen';
 import SettingsScreen from './components/screens/SettingsScreen';
 import ProfileScreen from './components/screens/ProfileScreen';
+import ArchiveScreen from './components/screens/ArchiveScreen';
 
 const App: React.FC = () => {
   return (
@@ -71,6 +72,7 @@ const AppRouter: React.FC = () => {
             <>
               <Route path="/pairs" element={<PairsListScreen />} />
               <Route path="/pairing" element={<PairingScreen />} />
+              <Route path="/archive" element={<ArchiveScreen />} />
               <Route path="*" element={<Navigate to="/pairs" />} />
             </>
           ) : (
@@ -86,6 +88,7 @@ const AppRouter: React.FC = () => {
               <Route path="profile" element={<ProfileScreen />} />
               <Route path="pairs" element={<PairsListScreen />} />
               <Route path="pairing" element={<PairingScreen />} />
+              <Route path="archive" element={<ArchiveScreen />} />
               <Route path="*" element={<Navigate to={`/${defaultScreen}`} />} />
             </Route>
           )}
