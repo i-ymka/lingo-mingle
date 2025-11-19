@@ -1,5 +1,5 @@
 import { db } from '../../config/firebase';
-import { doc, getDoc, setDoc, updateDoc, collection, query, where, getDocs, onSnapshot, Timestamp } from 'firebase/firestore';
+import { doc, getDoc, setDoc, updateDoc, deleteDoc, collection, query, where, getDocs, onSnapshot, Timestamp } from 'firebase/firestore';
 import type { Pair } from '../../types';
 
 /**
@@ -253,4 +253,53 @@ export const listenToPair = (
       callback(null);
     }
   );
+};
+
+/**
+ * Delete/leave a pair
+ * If user is the only one in the pair, delete it completely
+ * If there's a partner, just remove current user from the pair
+ */
+export const deletePair = async (pairId: string, userId: string): Promise<void> => {
+  try {
+    const pairRef = doc(db, 'pairs', pairId);
+    const pairSnap = await getDoc(pairRef);
+
+    if (!pairSnap.exists()) {
+      throw new Error('Pair not found');
+    }
+
+    const pairData = pairSnap.data();
+    const userIds = pairData.userIds;
+
+    // Check if this is the only user in the pair
+    const otherUsers = userIds.filter((id: string | null) => id && id !== userId);
+
+    if (otherUsers.length === 0) {
+      // Last user - delete the pair completely
+      await deleteDoc(pairRef);
+      console.log('✅ Pair deleted completely:', pairId);
+    } else {
+      // There's a partner - just remove current user
+      const newUserIds: [string | null, string | null] = [null, null];
+      let index = 0;
+      for (const id of userIds) {
+        if (id !== userId && id !== null) {
+          newUserIds[index] = id;
+          index++;
+        }
+      }
+
+      await updateDoc(pairRef, {
+        userIds: newUserIds,
+        status: newUserIds[1] === null ? 'pending' : 'active',
+        updatedAt: Timestamp.now(),
+      });
+
+      console.log('✅ User removed from pair:', pairId);
+    }
+  } catch (error) {
+    console.error('❌ Failed to delete pair:', error);
+    throw new Error('Failed to delete pair. Please try again.');
+  }
 };
