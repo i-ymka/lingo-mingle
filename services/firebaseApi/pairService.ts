@@ -160,6 +160,34 @@ export const getPairByInviteCode = async (inviteCode: string): Promise<Pair | nu
 };
 
 /**
+ * Get all pairs for a specific user
+ */
+export const getAllUserPairs = async (userId: string): Promise<Pair[]> => {
+  try {
+    const pairsRef = collection(db, 'pairs');
+    const q = query(pairsRef, where('userIds', 'array-contains', userId));
+    const querySnapshot = await getDocs(q);
+
+    const pairs: Pair[] = [];
+    querySnapshot.forEach((doc) => {
+      const data = doc.data();
+      pairs.push({
+        id: doc.id,
+        createdAt: data.createdAt.toDate().toISOString(),
+        inviteCode: data.inviteCode,
+        userIds: data.userIds,
+      });
+    });
+
+    console.log(`✅ Found ${pairs.length} pairs for user ${userId}`);
+    return pairs;
+  } catch (error) {
+    console.error('❌ Failed to get user pairs:', error);
+    return [];
+  }
+};
+
+/**
  * Listen to pair changes in real-time
  */
 export const listenToPair = (

@@ -12,7 +12,9 @@ interface DataContextType {
   login: (user: User) => void;
   logout: () => void;
   loadPair: (pairId: string) => void;
+  leavePair: () => Promise<void>;
   reloadEntries: () => void;
+  refreshAll: () => Promise<void>;
   userRole: UserRole | null;
   updateUserProfile: (updates: Partial<User>) => void;
   isOnline: boolean;
@@ -51,9 +53,9 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         if (firestoreUser) {
           setUser(firestoreUser);
 
-          // Load pair if user has one
-          if (firestoreUser.pairId) {
-            const userPair = await firebaseApi.getPair(firestoreUser.pairId);
+          // Load active pair if user has one selected
+          if (firestoreUser.activePairId) {
+            const userPair = await firebaseApi.getPair(firestoreUser.activePairId);
             if (userPair) {
               setPair(userPair);
 
@@ -62,7 +64,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
               setUserRole(role);
 
               // Load entries
-              const pairEntries = await firebaseApi.getEntries(firestoreUser.pairId);
+              const pairEntries = await firebaseApi.getEntries(firestoreUser.activePairId);
               setEntries(pairEntries);
             }
           }
@@ -147,8 +149,8 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         const syncedCount = api.syncOfflineEntries();
         if (syncedCount > 0) {
           console.log(`Successfully synced ${syncedCount} entries.`);
-          if (user && user.pairId) {
-            setEntries(api.getEntries(user.pairId));
+          if (user && user.activePairId) {
+            setEntries(api.getEntries(user.activePairId));
           }
         }
       }
@@ -186,8 +188,8 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const currentUser = api.getCurrentUser();
     if (currentUser) {
       setUser(currentUser);
-      if (currentUser.pairId) {
-        const currentPair = api.getPair(currentUser.pairId);
+      if (currentUser.activePairId) {
+        const currentPair = api.getPair(currentUser.activePairId);
         if (currentPair) {
           setPair(currentPair);
           setEntries(api.getEntries(currentPair.id));
@@ -248,8 +250,8 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       if (currentPair && user) {
         setPair(currentPair);
 
-        // Update user with pairId
-        await firebaseApi.updateUser(user.id, { pairId: currentPair.id });
+        // Update user with activePairId
+        await firebaseApi.updateUser(user.id, { activePairId: currentPair.id });
 
         // Determine role
         const role = currentPair.userIds[0] === user.id ? 'A' : 'B';
@@ -267,13 +269,28 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       const currentPair = api.getPair(pairId);
       if (currentPair && user) {
         setPair(currentPair);
-        api.updateUser({ ...user, pairId: currentPair.id });
+        api.updateUser({ ...user, activePairId: currentPair.id });
         reloadEntries();
         const role = currentPair.userIds[0] === user.id ? 'A' : 'B';
         setUserRole(role);
-        api.updateUser({ ...user, pairId: currentPair.id, role: role });
+        api.updateUser({ ...user, activePairId: currentPair.id, role: role });
       }
     }
+  };
+
+  const leavePair = async () => {
+    if (useFirebase && user) {
+      // Firebase: Clear activePairId
+      await firebaseApi.updateUser(user.id, { activePairId: undefined, role: undefined });
+    } else if (user) {
+      // localStorage: Clear activePairId
+      api.updateUser({ ...user, activePairId: undefined, role: undefined });
+    }
+
+    // Clear local state
+    setPair(null);
+    setEntries([]);
+    setUserRole(null);
   };
 
   const updateUserProfile = async (updates: Partial<User>) => {
@@ -290,6 +307,30 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   };
 
+  const refreshAll = useCallback(async () => {
+    if (useFirebase && user && pair) {
+      // Firebase: Reload user, pair, and entries
+      const [updatedUser, updatedPair, updatedEntries] = await Promise.all([
+        firebaseApi.getUser(user.id),
+        firebaseApi.getPair(pair.id),
+        firebaseApi.getEntries(pair.id),
+      ]);
+
+      if (updatedUser) setUser(updatedUser);
+      if (updatedPair) setPair(updatedPair);
+      setEntries(updatedEntries);
+    } else if (!useFirebase && user && pair) {
+      // localStorage
+      const updatedUser = api.getUser(user.id);
+      const updatedPair = api.getPair(pair.id);
+      const updatedEntries = api.getEntries(pair.id);
+
+      if (updatedUser) setUser(updatedUser);
+      if (updatedPair) setPair(updatedPair);
+      setEntries(updatedEntries);
+    }
+  }, [useFirebase, user, pair]);
+
   const value = {
     user,
     pair,
@@ -298,7 +339,9 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     login,
     logout,
     loadPair,
+    leavePair,
     reloadEntries,
+    refreshAll,
     userRole,
     updateUserProfile,
     isOnline,

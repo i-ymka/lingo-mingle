@@ -2,6 +2,8 @@ import React from 'react';
 import { Outlet, NavLink, useLocation, Link } from 'react-router-dom';
 import { MessageSquare, BookOpen, PlusCircle, Star, BarChart3, Settings, User as UserIcon, LogOut, WifiOff } from 'lucide-react';
 import { useData } from '../../contexts/DataContext';
+import { usePullToRefresh } from '../../hooks/usePullToRefresh';
+import PullToRefreshIndicator from '../ui/PullToRefresh';
 import Dropdown from '../ui/Dropdown';
 
 const navItems = [
@@ -42,7 +44,13 @@ const StandardNavItem: React.FC<{ item: typeof navItems[0] }> = ({ item }) => {
 
 
 const MainLayout: React.FC = () => {
-    const { user, logout, isOnline } = useData();
+    const { user, logout, isOnline, refreshAll } = useData();
+
+    // Pull-to-refresh for mobile
+    const { isRefreshing, pullDistance } = usePullToRefresh({
+        onRefresh: refreshAll,
+        threshold: 80,
+    });
 
     // Split nav items for layout
     const leftItems = navItems.slice(0, 2);
@@ -52,6 +60,13 @@ const MainLayout: React.FC = () => {
 
     return (
         <div className="flex flex-col h-full bg-base-100">
+            {/* Pull-to-refresh indicator */}
+            <PullToRefreshIndicator
+                pullDistance={pullDistance}
+                isRefreshing={isRefreshing}
+                threshold={80}
+            />
+
             {!isOnline && (
                 <div className="bg-yellow-500 text-yellow-900 text-center p-2 text-sm font-semibold flex items-center justify-center z-50">
                     <WifiOff size={16} className="mr-2" />
