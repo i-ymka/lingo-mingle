@@ -84,6 +84,8 @@ const AppRouter: React.FC = () => {
               <Route path="stats" element={<StatsScreen />} />
               <Route path="settings" element={<SettingsScreen />} />
               <Route path="profile" element={<ProfileScreen />} />
+              <Route path="pairs" element={<PairsListScreen />} />
+              <Route path="pairing" element={<PairingScreen />} />
               <Route path="*" element={<Navigate to={`/${defaultScreen}`} />} />
             </Route>
           )}

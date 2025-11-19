@@ -1,18 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useData } from '../../contexts/DataContext';
-import { getAllUserPairs } from '../../services/firebaseApi';
+import { getAllUserPairs, deletePair as deletePairFirebase } from '../../services/firebaseApi';
 import type { Pair } from '../../types';
 import Button from '../ui/Button';
 import Input from '../ui/Input';
-import { Users, Plus, Link as LinkIcon, Calendar } from 'lucide-react';
+import { Users, Plus, Link as LinkIcon, Calendar, Trash2 } from 'lucide-react';
 
 const PairsListScreen: React.FC = () => {
   const navigate = useNavigate();
-  const { user, loadPair, useFirebase } = useData();
+  const { user, loadPair, useFirebase, leavePair } = useData();
   const [pairs, setPairs] = useState<Pair[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showJoinModal, setShowJoinModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [pairToDelete, setPairToDelete] = useState<string | null>(null);
   const [inviteCode, setInviteCode] = useState('');
 
   useEffect(() => {
@@ -47,6 +49,24 @@ const PairsListScreen: React.FC = () => {
     }
   };
 
+  const handleDeletePair = async () => {
+    if (!pairToDelete || !user) return;
+
+    try {
+      await deletePairFirebase(pairToDelete, user.id);
+      // Also leave the pair if it's the active one
+      await leavePair();
+      // Reload pairs list
+      const userPairs = await getAllUserPairs(user.id);
+      setPairs(userPairs);
+      setShowDeleteModal(false);
+      setPairToDelete(null);
+    } catch (error) {
+      console.error('Failed to delete pair:', error);
+      alert(error instanceof Error ? error.message : 'Failed to delete pair');
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-full">
@@ -76,13 +96,15 @@ const PairsListScreen: React.FC = () => {
             const isComplete = pair.userIds[0] && pair.userIds[1];
 
             return (
-              <button
+              <div
                 key={pair.id}
-                onClick={() => handleSelectPair(pair.id)}
-                className="w-full bg-base-200 rounded-lg p-4 shadow hover:shadow-lg transition-all text-left border-2 border-transparent hover:border-primary"
+                className="w-full bg-base-200 rounded-lg p-4 shadow hover:shadow-lg transition-all border-2 border-transparent hover:border-primary"
               >
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
+                  <button
+                    onClick={() => handleSelectPair(pair.id)}
+                    className="flex items-center gap-3 flex-1 text-left"
+                  >
                     <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
                       <Users size={24} className="text-primary" />
                     </div>
@@ -95,13 +117,25 @@ const PairsListScreen: React.FC = () => {
                         {new Date(pair.createdAt).toLocaleDateString()}
                       </p>
                     </div>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-xs text-text-muted">Code</p>
-                    <p className="font-mono font-semibold text-primary">{pair.inviteCode}</p>
+                  </button>
+                  <div className="flex items-center gap-3">
+                    <div className="text-right">
+                      <p className="text-xs text-text-muted">Code</p>
+                      <p className="font-mono font-semibold text-primary">{pair.inviteCode}</p>
+                    </div>
+                    <button
+                      onClick={() => {
+                        setPairToDelete(pair.id);
+                        setShowDeleteModal(true);
+                      }}
+                      className="p-2 hover:bg-red-500/20 rounded-lg transition-colors"
+                      title="Delete pair"
+                    >
+                      <Trash2 size={20} className="text-red-500" />
+                    </button>
                   </div>
                 </div>
-              </button>
+              </div>
             );
           })
         )}
@@ -148,6 +182,37 @@ const PairsListScreen: React.FC = () => {
                 onClick={() => {
                   setShowJoinModal(false);
                   setInviteCode('');
+                }}
+                variant="outline"
+                className="flex-1"
+              >
+                Cancel
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Pair Confirmation Modal */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-base-100 rounded-lg p-6 max-w-md w-full">
+            <h3 className="text-xl font-bold text-text-main mb-4">Delete Pair?</h3>
+            <p className="text-text-muted mb-6">
+              Are you sure you want to delete this pair? All words and progress will be lost.
+              This action cannot be undone.
+            </p>
+            <div className="flex gap-3">
+              <Button
+                onClick={handleDeletePair}
+                className="flex-1 bg-red-500 hover:bg-red-600"
+              >
+                Delete
+              </Button>
+              <Button
+                onClick={() => {
+                  setShowDeleteModal(false);
+                  setPairToDelete(null);
                 }}
                 variant="outline"
                 className="flex-1"
