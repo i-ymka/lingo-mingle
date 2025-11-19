@@ -24,6 +24,13 @@ export const createUser = (displayName: string, nativeLang: Language, partnerNat
 
 export const getCurrentUser = (): User | null => get<User>('user');
 
+export const getUser = (userId: string): User | null => {
+  // Mock API only stores one user in localStorage
+  // In real implementation, this would fetch by userId
+  const user = getCurrentUser();
+  return user && user.id === userId ? user : null;
+};
+
 export const updateUser = (updates: Partial<User>): User | null => {
   const user = getCurrentUser();
   if (!user) return null;

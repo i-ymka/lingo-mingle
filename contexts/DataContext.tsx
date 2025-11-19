@@ -13,6 +13,7 @@ interface DataContextType {
   logout: () => void;
   loadPair: (pairId: string) => void;
   reloadEntries: () => void;
+  refreshAll: () => Promise<void>;
   userRole: UserRole | null;
   updateUserProfile: (updates: Partial<User>) => void;
   isOnline: boolean;
@@ -290,6 +291,30 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   };
 
+  const refreshAll = useCallback(async () => {
+    if (useFirebase && user && pair) {
+      // Firebase: Reload user, pair, and entries
+      const [updatedUser, updatedPair, updatedEntries] = await Promise.all([
+        firebaseApi.getUser(user.id),
+        firebaseApi.getPair(pair.id),
+        firebaseApi.getEntries(pair.id),
+      ]);
+
+      if (updatedUser) setUser(updatedUser);
+      if (updatedPair) setPair(updatedPair);
+      setEntries(updatedEntries);
+    } else if (!useFirebase && user && pair) {
+      // localStorage
+      const updatedUser = api.getUser(user.id);
+      const updatedPair = api.getPair(pair.id);
+      const updatedEntries = api.getEntries(pair.id);
+
+      if (updatedUser) setUser(updatedUser);
+      if (updatedPair) setPair(updatedPair);
+      setEntries(updatedEntries);
+    }
+  }, [useFirebase, user, pair]);
+
   const value = {
     user,
     pair,
@@ -299,6 +324,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     logout,
     loadPair,
     reloadEntries,
+    refreshAll,
     userRole,
     updateUserProfile,
     isOnline,
