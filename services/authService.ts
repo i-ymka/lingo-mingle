@@ -80,12 +80,21 @@ export const signInWithGoogle = async (): Promise<FirebaseUser> => {
     return userCredential.user;
   } catch (error: any) {
     console.error('❌ Google sign-in failed:', error);
+    console.error('Error code:', error.code);
+    console.error('Error message:', error.message);
+
     if (error.code === 'auth/popup-closed-by-user') {
       throw new Error('Sign-in cancelled. Please try again.');
     } else if (error.code === 'auth/popup-blocked') {
       throw new Error('Popup blocked by browser. Please allow popups and try again.');
+    } else if (error.code === 'auth/unauthorized-domain') {
+      throw new Error('This domain is not authorized. Please contact support.');
+    } else if (error.code === 'auth/operation-not-allowed') {
+      throw new Error('Google sign-in is not enabled. Please contact support.');
     }
-    throw new Error('Failed to sign in with Google. Please try again.');
+
+    // Show the actual error for debugging
+    throw new Error(error.message || 'Failed to sign in with Google. Please try again.');
   }
 };
 

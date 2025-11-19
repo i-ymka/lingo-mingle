@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { signInWithEmail, signInWithGoogle } from '../../services/authService';
+import { usePullToRefresh } from '../../hooks/usePullToRefresh';
+import PullToRefreshIndicator from '../ui/PullToRefresh';
 import Button from '../ui/Button';
 import Input from '../ui/Input';
 import { Mail, Lock, LogIn } from 'lucide-react';
@@ -11,6 +13,18 @@ const LoginScreen: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const navigate = useNavigate();
+
+  // Pull-to-refresh functionality
+  const handleRefresh = async () => {
+    // Simple refresh - just reload the page state
+    await new Promise(resolve => setTimeout(resolve, 500));
+    setError('');
+  };
+
+  const { isRefreshing, pullDistance } = usePullToRefresh({
+    onRefresh: handleRefresh,
+    threshold: 80,
+  });
 
   const handleEmailLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -44,11 +58,17 @@ const LoginScreen: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col h-full p-6 bg-base-100">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-text-main mb-2">Welcome Back!</h1>
-        <p className="text-text-muted">Sign in to continue your language journey.</p>
-      </div>
+    <>
+      <PullToRefreshIndicator
+        pullDistance={pullDistance}
+        isRefreshing={isRefreshing}
+        threshold={80}
+      />
+      <div className="flex flex-col h-full p-6 bg-base-100">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-text-main mb-2">Welcome Back!</h1>
+          <p className="text-text-muted">Sign in to continue your language journey.</p>
+        </div>
 
       <form onSubmit={handleEmailLogin} className="flex flex-col flex-grow space-y-4">
         <Input
@@ -124,6 +144,7 @@ const LoginScreen: React.FC = () => {
         </div>
       </form>
     </div>
+    </>
   );
 };
 
