@@ -127,6 +127,8 @@ const SignupScreen: React.FC = () => {
               Continue
             </Button>
 
+            {/* Google OAuth temporarily disabled - Firebase Console configuration issue */}
+            {/*
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
                 <div className="w-full border-t border-base-300"></div>
@@ -150,6 +152,7 @@ const SignupScreen: React.FC = () => {
               </svg>
               Sign up with Google
             </Button>
+            */}
           </div>
 
           <div className="mt-auto pt-4 text-center">
