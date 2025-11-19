@@ -5,11 +5,11 @@ import { useTheme } from '../../contexts/ThemeContext';
 
 const StatsScreen: React.FC = () => {
     const { entries, userRole } = useData();
-    const { theme } = useTheme();
+    const { effectiveTheme } = useTheme();
 
     const readyEntries = entries.filter(e => e.status === 'ready');
     const waitingEntries = entries.filter(e => e.status === 'waiting_partner_audio');
-    
+
     const srsData = [
         { name: 'Box 1', count: 0 },
         { name: 'Box 2', count: 0 },
@@ -33,7 +33,7 @@ const StatsScreen: React.FC = () => {
         twilight: { text: '#9ca3af', primary: '#818cf8' },
         forest: { text: '#a8a29e', primary: '#4ade80' },
     };
-    const currentThemeColors = themeColors[theme];
+    const currentThemeColors = themeColors[effectiveTheme];
 
     return (
         <div className="p-4 space-y-6">
