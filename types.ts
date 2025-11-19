@@ -19,6 +19,8 @@ export interface Pair {
   id: string;
   createdAt: string;
   inviteCode: string;
+  inviteCodeExpiresAt: string | null; // ISO timestamp when invite code expires (5 minutes after creation)
+  inviteCodeUsed: boolean; // True if invite code has been used once
   userIds: [string, string | null];
 }
 

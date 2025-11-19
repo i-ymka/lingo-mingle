@@ -127,15 +127,14 @@ const SettingsScreen: React.FC = () => {
                 <div className="space-y-2 pt-4 border-t border-base-300">
                     <h3 className="text-lg font-semibold text-text-main">Current Pair</h3>
                     <p className="text-sm text-text-muted mb-3">
-                        Leave this pair to switch to another or create a new one. Your progress will be saved.
+                        Switch to another pair or create a new one. Your progress will be saved.
                     </p>
                     <Button
                         onClick={() => setShowLeaveConfirm(true)}
-                        variant="outline"
-                        className="w-full flex items-center justify-center gap-2 text-red-600 border-red-600 hover:bg-red-50"
+                        variant="secondary"
                     >
                         <LogOut size={20} />
-                        Leave Pair
+                        Switch Pair
                     </Button>
                 </div>
             )}
@@ -144,23 +143,22 @@ const SettingsScreen: React.FC = () => {
             {showLeaveConfirm && (
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
                     <div className="bg-base-100 rounded-lg p-6 max-w-md w-full">
-                        <h3 className="text-xl font-bold text-text-main mb-4">Leave This Pair?</h3>
+                        <h3 className="text-xl font-bold text-text-main mb-4">Switch to Another Pair?</h3>
                         <p className="text-text-muted mb-6">
-                            You'll return to the pairs list. You can rejoin this pair anytime using the invite code:{' '}
-                            <code className="bg-base-300 px-2 py-1 rounded font-mono font-semibold">
-                                {pair?.inviteCode}
-                            </code>
+                            You'll return to your pairs list where you can select a different pair or create a new one.
+                            All your progress in this pair will be saved and you can return to it anytime.
                         </p>
                         <div className="flex gap-3">
                             <Button
                                 onClick={handleLeavePair}
-                                className="flex-1 bg-red-600 hover:bg-red-700"
+                                variant="primary"
+                                className="flex-1"
                             >
-                                Leave Pair
+                                Continue
                             </Button>
                             <Button
                                 onClick={() => setShowLeaveConfirm(false)}
-                                variant="outline"
+                                variant="secondary"
                                 className="flex-1"
                             >
                                 Cancel

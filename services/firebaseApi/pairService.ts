@@ -25,10 +25,15 @@ export const createPair = async (userId: string): Promise<Pair> => {
   const pairRef = doc(db, 'pairs', pairId);
   const inviteCodeRef = doc(db, 'inviteCodes', inviteCode);
 
+  // Invite code expires in 5 minutes
+  const expiresAt = new Date(Date.now() + 5 * 60 * 1000);
+
   const newPair: Pair = {
     id: pairId,
     createdAt: new Date().toISOString(),
     inviteCode,
+    inviteCodeExpiresAt: expiresAt.toISOString(),
+    inviteCodeUsed: false,
     userIds: [userId, null],
   };
 
@@ -36,6 +41,8 @@ export const createPair = async (userId: string): Promise<Pair> => {
     // Create pair document
     await setDoc(pairRef, {
       inviteCode,
+      inviteCodeExpiresAt: Timestamp.fromDate(expiresAt),
+      inviteCodeUsed: false,
       userIds: [userId, null],
       status: 'pending',
       createdAt: Timestamp.now(),
@@ -44,11 +51,12 @@ export const createPair = async (userId: string): Promise<Pair> => {
     // Create invite code document for fast lookup
     await setDoc(inviteCodeRef, {
       pairId,
+      expiresAt: Timestamp.fromDate(expiresAt),
       createdAt: Timestamp.now(),
       used: false,
     });
 
-    console.log('✅ Pair created:', pairId, 'Invite code:', inviteCode);
+    console.log('✅ Pair created:', pairId, 'Invite code:', inviteCode, 'Expires:', expiresAt.toISOString());
     return newPair;
   } catch (error) {
     console.error('❌ Failed to create pair:', error);
@@ -67,16 +75,31 @@ export const joinPair = async (userId: string, inviteCode: string): Promise<Pair
 
     if (!inviteCodeSnap.exists()) {
       console.log('❌ Invalid invite code:', inviteCode);
-      return null;
+      throw new Error('Invalid invite code. Please check and try again.');
     }
 
-    const pairId = inviteCodeSnap.data().pairId;
+    const inviteCodeData = inviteCodeSnap.data();
+
+    // Check if invite code has been used
+    if (inviteCodeData.used) {
+      console.log('❌ Invite code already used:', inviteCode);
+      throw new Error('This invite code has already been used. Please request a new code from your partner.');
+    }
+
+    // Check if invite code has expired
+    const expiresAt = inviteCodeData.expiresAt.toDate();
+    if (new Date() > expiresAt) {
+      console.log('❌ Invite code expired:', inviteCode, 'Expired at:', expiresAt);
+      throw new Error('This invite code has expired. Please request a new code from your partner.');
+    }
+
+    const pairId = inviteCodeData.pairId;
     const pairRef = doc(db, 'pairs', pairId);
     const pairSnap = await getDoc(pairRef);
 
     if (!pairSnap.exists()) {
       console.log('❌ Pair not found:', pairId);
-      return null;
+      throw new Error('Pair not found. Please check the invite code.');
     }
 
     const pairData = pairSnap.data();
@@ -84,12 +107,13 @@ export const joinPair = async (userId: string, inviteCode: string): Promise<Pair
     // Check if pair is already full
     if (pairData.userIds[1] !== null) {
       console.log('❌ Pair is full:', pairId);
-      return null;
+      throw new Error('This pair is already full. Please request a new code from your partner.');
     }
 
     // Update pair with second user
     await updateDoc(pairRef, {
       userIds: [pairData.userIds[0], userId],
+      inviteCodeUsed: true,
       status: 'active',
       updatedAt: Timestamp.now(),
     });
@@ -105,11 +129,17 @@ export const joinPair = async (userId: string, inviteCode: string): Promise<Pair
       id: pairId,
       createdAt: pairData.createdAt.toDate().toISOString(),
       inviteCode: pairData.inviteCode,
+      inviteCodeExpiresAt: pairData.inviteCodeExpiresAt ? pairData.inviteCodeExpiresAt.toDate().toISOString() : null,
+      inviteCodeUsed: true,
       userIds: [pairData.userIds[0], userId],
     };
   } catch (error) {
     console.error('❌ Failed to join pair:', error);
-    return null;
+    // Re-throw error with message for UI
+    if (error instanceof Error) {
+      throw error;
+    }
+    throw new Error('Failed to join pair. Please try again.');
   }
 };
 
@@ -128,6 +158,8 @@ export const getPair = async (pairId: string): Promise<Pair | null> => {
         id: pairSnap.id,
         createdAt: data.createdAt.toDate().toISOString(),
         inviteCode: data.inviteCode,
+        inviteCodeExpiresAt: data.inviteCodeExpiresAt ? data.inviteCodeExpiresAt.toDate().toISOString() : null,
+        inviteCodeUsed: data.inviteCodeUsed || false,
         userIds: data.userIds,
       };
     }
@@ -175,6 +207,8 @@ export const getAllUserPairs = async (userId: string): Promise<Pair[]> => {
         id: doc.id,
         createdAt: data.createdAt.toDate().toISOString(),
         inviteCode: data.inviteCode,
+        inviteCodeExpiresAt: data.inviteCodeExpiresAt ? data.inviteCodeExpiresAt.toDate().toISOString() : null,
+        inviteCodeUsed: data.inviteCodeUsed || false,
         userIds: data.userIds,
       });
     });
@@ -205,6 +239,8 @@ export const listenToPair = (
           id: snapshot.id,
           createdAt: data.createdAt.toDate().toISOString(),
           inviteCode: data.inviteCode,
+          inviteCodeExpiresAt: data.inviteCodeExpiresAt ? data.inviteCodeExpiresAt.toDate().toISOString() : null,
+          inviteCodeUsed: data.inviteCodeUsed || false,
           userIds: data.userIds,
         };
         callback(pair);

@@ -63,8 +63,6 @@ const PairingScreen: React.FC = () => {
           await loadPair(joinedPair.id);
           console.log('✅ Joined pair in Firebase:', joinedPair.id);
           navigate('/inbox');
-        } else {
-          setError('Invalid or full invite code. Please try again.');
         }
       } else {
         // localStorage
@@ -81,7 +79,9 @@ const PairingScreen: React.FC = () => {
       }
     } catch (err) {
       console.error('❌ Failed to join pair:', err);
-      setError('Failed to join pair. Please try again.');
+      // Show specific error message from Firebase
+      const errorMessage = err instanceof Error ? err.message : 'Failed to join pair. Please try again.';
+      setError(errorMessage);
     } finally {
       setIsLoading(false);
     }
