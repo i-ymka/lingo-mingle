@@ -11,8 +11,8 @@ export interface User {
   nativeLang: Language;
   partnerNativeLang: Language;
   pivotLang: Language;
-  pairId?: string;
-  role?: UserRole; // 'A' or 'B'
+  activePairId?: string; // Currently selected pair for multi-pair support
+  role?: UserRole; // 'A' or 'B' - determined by position in current pair
 }
 
 export interface Pair {

@@ -52,9 +52,9 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         if (firestoreUser) {
           setUser(firestoreUser);
 
-          // Load pair if user has one
-          if (firestoreUser.pairId) {
-            const userPair = await firebaseApi.getPair(firestoreUser.pairId);
+          // Load active pair if user has one selected
+          if (firestoreUser.activePairId) {
+            const userPair = await firebaseApi.getPair(firestoreUser.activePairId);
             if (userPair) {
               setPair(userPair);
 
@@ -63,7 +63,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
               setUserRole(role);
 
               // Load entries
-              const pairEntries = await firebaseApi.getEntries(firestoreUser.pairId);
+              const pairEntries = await firebaseApi.getEntries(firestoreUser.activePairId);
               setEntries(pairEntries);
             }
           }
@@ -148,8 +148,8 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         const syncedCount = api.syncOfflineEntries();
         if (syncedCount > 0) {
           console.log(`Successfully synced ${syncedCount} entries.`);
-          if (user && user.pairId) {
-            setEntries(api.getEntries(user.pairId));
+          if (user && user.activePairId) {
+            setEntries(api.getEntries(user.activePairId));
           }
         }
       }
@@ -187,8 +187,8 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const currentUser = api.getCurrentUser();
     if (currentUser) {
       setUser(currentUser);
-      if (currentUser.pairId) {
-        const currentPair = api.getPair(currentUser.pairId);
+      if (currentUser.activePairId) {
+        const currentPair = api.getPair(currentUser.activePairId);
         if (currentPair) {
           setPair(currentPair);
           setEntries(api.getEntries(currentPair.id));
