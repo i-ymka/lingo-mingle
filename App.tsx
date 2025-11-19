@@ -4,6 +4,8 @@ import { DataProvider, useData } from './contexts/DataContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { useDefaultScreen } from './hooks/useDefaultScreen';
 import SplashScreen from './components/screens/SplashScreen';
+import LoginScreen from './components/screens/LoginScreen';
+import SignupScreen from './components/screens/SignupScreen';
 import OnboardingScreen from './components/screens/OnboardingScreen';
 import PairingScreen from './components/screens/PairingScreen';
 import PairsListScreen from './components/screens/PairsListScreen';
@@ -45,6 +47,9 @@ const AppRouter: React.FC = () => {
     );
   }
 
+  // Check if user has completed their profile
+  const hasCompletedProfile = user?.displayName && user?.nativeLang && user?.partnerNativeLang && user?.pivotLang;
+
   return (
     <div className="h-screen w-screen max-w-md mx-auto bg-base-100 text-text-main font-sans flex flex-col shadow-2xl">
       <HashRouter>
@@ -52,8 +57,15 @@ const AppRouter: React.FC = () => {
           {!user ? (
             <>
               <Route path="/" element={<SplashScreen />} />
+              <Route path="/login" element={<LoginScreen />} />
+              <Route path="/signup" element={<SignupScreen />} />
               <Route path="/onboarding" element={<OnboardingScreen />} />
               <Route path="*" element={<Navigate to="/" />} />
+            </>
+          ) : !hasCompletedProfile ? (
+            <>
+              <Route path="/onboarding" element={<OnboardingScreen />} />
+              <Route path="*" element={<Navigate to="/onboarding" />} />
             </>
           ) : !pair ? (
             <>

@@ -38,7 +38,7 @@ const SplashScreen: React.FC = () => {
   }, [currentIndex]);
 
   const handleStart = () => {
-    navigate('/onboarding');
+    navigate('/login');
   };
 
   return (
