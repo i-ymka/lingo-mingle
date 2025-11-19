@@ -5,6 +5,9 @@ interface AudioPlayerProps {
   audioData: string; // base64 data URL
 }
 
+// Global audio manager to ensure only one audio plays at a time
+let currentlyPlayingAudio: HTMLAudioElement | null = null;
+
 const AudioPlayer: React.FC<AudioPlayerProps> = ({ audioData }) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -14,32 +17,63 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({ audioData }) => {
     if (audioRef.current) {
       audioRef.current.pause();
       audioRef.current.onended = null;
+      audioRef.current.onplay = null;
+      audioRef.current.onpause = null;
+      audioRef.current.onerror = null;
       audioRef.current = null;
     }
 
     // Create new audio instance only if audioData exists
     if (audioData) {
-      audioRef.current = new Audio(audioData);
-      audioRef.current.onended = () => setIsPlaying(false);
+      const audio = new Audio(audioData);
+      audioRef.current = audio;
+
+      // Set up event listeners to sync state with actual playback
+      audio.onplay = () => setIsPlaying(true);
+      audio.onpause = () => setIsPlaying(false);
+      audio.onended = () => setIsPlaying(false);
+      audio.onerror = (e) => {
+        console.error('Audio playback error:', e);
+        setIsPlaying(false);
+      };
     }
 
     return () => {
       if (audioRef.current) {
         audioRef.current.pause();
         audioRef.current.onended = null;
+        audioRef.current.onplay = null;
+        audioRef.current.onpause = null;
+        audioRef.current.onerror = null;
+        if (currentlyPlayingAudio === audioRef.current) {
+          currentlyPlayingAudio = null;
+        }
         audioRef.current = null;
       }
     };
   }, [audioData]);
 
-  const togglePlay = () => {
-    if (audioRef.current) {
+  const togglePlay = async () => {
+    if (!audioRef.current) return;
+
+    try {
       if (isPlaying) {
+        // Pause current audio
         audioRef.current.pause();
       } else {
-        audioRef.current.play();
+        // Stop any other currently playing audio
+        if (currentlyPlayingAudio && currentlyPlayingAudio !== audioRef.current) {
+          currentlyPlayingAudio.pause();
+          currentlyPlayingAudio.currentTime = 0;
+        }
+
+        // Play this audio
+        await audioRef.current.play();
+        currentlyPlayingAudio = audioRef.current;
       }
-      setIsPlaying(!isPlaying);
+    } catch (error) {
+      console.error('Error toggling audio playback:', error);
+      setIsPlaying(false);
     }
   };
 
