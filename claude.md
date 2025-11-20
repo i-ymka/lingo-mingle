@@ -5,6 +5,24 @@
 
 ---
 
+## 🎨 Design Specification
+
+**📐 [Design Spec 2025](./design-spec.md)** - Complete visual and UX guidelines based on modern iOS design trends, Apple Design Awards winners, and Human Interface Guidelines 2025.
+
+This document defines:
+- Layout system (8pt grid)
+- Color palette & gradients
+- Typography (SF / Inter)
+- Glassmorphism & visual effects
+- Component patterns
+- Animation & micro-interactions
+- Dark mode implementation
+- Gesture patterns
+
+**Status:** Active design reference for all UI/UX work
+
+---
+
 ## 📋 О проекте
 
 **Название:** Lingo Mingle

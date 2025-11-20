@@ -1,7 +1,7 @@
 import React, { ButtonHTMLAttributes } from 'react';
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'primary' | 'secondary' | 'danger' | 'ghost';
+  variant?: 'primary' | 'secondary' | 'danger' | 'ghost' | 'outline';
   children: React.ReactNode;
 }
 
@@ -10,21 +10,62 @@ const Button: React.FC<ButtonProps> = ({ children, variant = 'primary', classNam
     'w-full',
     'flex items-center justify-center gap-2',
     'font-semibold',
-    'text-lg',
-    'py-4 px-6',
-    'rounded-xl',
-    'shadow-md hover:shadow-lg',
-    'border border-transparent',
-    'focus:outline-none focus:ring-2 focus:ring-offset-2',
-    'transition-all active:scale-95',
-    'disabled:opacity-50 disabled:cursor-not-allowed'
+    'text-base',
+    'py-3 px-6',
+    'rounded-lg', // iOS style: 12px
+    'min-h-touch-large', // 48px touch target
+    'border',
+    'focus:outline-none focus:ring-3 focus:ring-primary/30',
+    'transition-all duration-base ease-ios',
+    'active:scale-95',
+    'disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100'
   ].join(' ');
-  
+
   const variantClasses = {
-    primary: 'bg-primary text-primary-content hover:opacity-90 focus:ring-primary',
-    secondary: 'bg-secondary text-primary-content hover:opacity-90 focus:ring-secondary',
-    danger: 'bg-red-600 text-white hover:bg-red-700 focus:ring-red-500',
-    ghost: 'bg-transparent text-primary hover:bg-primary/10 focus:ring-primary',
+    // Primary with gradient (iOS 2025 style)
+    primary: [
+      'bg-gradient-to-br from-primary to-primary-dark',
+      'text-primary-content',
+      'border-transparent',
+      'shadow-float hover:shadow-elevated',
+      'hover:from-primary-dark hover:to-primary',
+    ].join(' '),
+
+    // Secondary/Ghost style
+    secondary: [
+      'bg-transparent',
+      'text-primary',
+      'border-2 border-primary',
+      'hover:bg-primary/10',
+      'shadow-none',
+    ].join(' '),
+
+    // Danger
+    danger: [
+      'bg-error',
+      'text-white',
+      'border-transparent',
+      'hover:bg-error/90',
+      'shadow-soft',
+    ].join(' '),
+
+    // Ghost (no border)
+    ghost: [
+      'bg-transparent',
+      'text-primary',
+      'border-transparent',
+      'hover:bg-primary/10',
+      'shadow-none',
+    ].join(' '),
+
+    // Outline
+    outline: [
+      'bg-transparent',
+      'text-text-main',
+      'border-2 border-base-300',
+      'hover:bg-base-200',
+      'shadow-none',
+    ].join(' '),
   };
 
   return (

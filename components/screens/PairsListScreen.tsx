@@ -161,10 +161,10 @@ const PairsListScreen: React.FC = () => {
               >
                 {/* Archive button revealed on swipe */}
                 {isSwiped && (
-                  <div className="absolute right-0 top-0 bottom-0 flex items-center bg-red-500 px-6 rounded-r-lg">
+                  <div className="absolute right-0 top-0 bottom-0 flex items-center bg-error px-6 rounded-r-xl">
                     <button
                       onClick={() => handleArchivePair(pair.id)}
-                      className="text-white font-semibold flex items-center gap-2"
+                      className="text-white font-semibold flex items-center gap-2 active:scale-95 transition-transform duration-fast"
                     >
                       <Archive size={20} />
                       Archive
@@ -172,32 +172,38 @@ const PairsListScreen: React.FC = () => {
                   </div>
                 )}
 
-                {/* Pair card */}
+                {/* Pair card - Modern iOS style */}
                 <button
                   onClick={() => !isSwiped && handleSelectPair(pair.id)}
-                  className={`w-full bg-base-200 rounded-lg p-4 shadow hover:shadow-lg transition-all text-left border-2 border-transparent hover:border-primary ${
-                    isSwiped ? 'translate-x-[-120px]' : ''
-                  }`}
+                  className={`
+                    w-full glass rounded-xl p-4
+                    shadow-soft hover:shadow-elevated
+                    transition-all duration-base ease-ios
+                    text-left border border-base-300/50
+                    hover:border-primary/50
+                    active:scale-98
+                    ${isSwiped ? 'translate-x-[-120px]' : ''}
+                  `}
                   style={{ transition: 'transform 0.3s ease' }}
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3 flex-1">
-                      <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
-                        <Users size={24} className="text-primary" />
+                      <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center">
+                        <Users size={26} className="text-primary" strokeWidth={2.5} />
                       </div>
                       <div>
-                        <h3 className="font-semibold text-text-main">
+                        <h3 className="font-semibold text-lg text-text-main">
                           {partnerNames[pair.id] || 'Loading...'}
                         </h3>
-                        <p className="text-sm text-text-muted flex items-center gap-1">
+                        <p className="text-sm text-text-secondary flex items-center gap-1 mt-1">
                           <Calendar size={14} />
                           {new Date(pair.createdAt).toLocaleDateString()}
                         </p>
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className="text-xs text-text-muted">Code</p>
-                      <p className="font-mono font-semibold text-primary">{pair.inviteCode}</p>
+                      <p className="text-xs text-text-muted mb-1">Code</p>
+                      <p className="font-mono text-lg font-bold text-primary">{pair.inviteCode}</p>
                     </div>
                   </div>
                 </button>
@@ -235,10 +241,10 @@ const PairsListScreen: React.FC = () => {
         </button>
       </div>
 
-      {/* Join by Code Modal */}
+      {/* Join by Code Modal - iOS Style */}
       {showJoinModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-base-100 rounded-lg p-6 max-w-md w-full">
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fade-in">
+          <div className="glass rounded-3xl p-6 max-w-md w-full shadow-elevated border border-base-300/50 animate-slide-up">
             <h3 className="text-xl font-bold text-text-main mb-4">Join by Code</h3>
             <Input
               id="invite-code"
