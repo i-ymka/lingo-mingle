@@ -1,21 +1,23 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useData } from '../../contexts/DataContext';
-import { getAllUserPairs, deletePair as deletePairFirebase } from '../../services/firebaseApi';
+import { getAllUserPairs, archivePair, getUser } from '../../services/firebaseApi';
 import type { Pair } from '../../types';
 import Button from '../ui/Button';
 import Input from '../ui/Input';
-import { Users, Plus, Link as LinkIcon, Calendar, Trash2 } from 'lucide-react';
+import { Users, Plus, Link as LinkIcon, Calendar, Archive } from 'lucide-react';
 
 const PairsListScreen: React.FC = () => {
   const navigate = useNavigate();
-  const { user, loadPair, useFirebase, leavePair } = useData();
+  const { user, loadPair, useFirebase } = useData();
   const [pairs, setPairs] = useState<Pair[]>([]);
+  const [partnerNames, setPartnerNames] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(true);
   const [showJoinModal, setShowJoinModal] = useState(false);
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [pairToDelete, setPairToDelete] = useState<string | null>(null);
   const [inviteCode, setInviteCode] = useState('');
+  const [swipedPair, setSwipedPair] = useState<string | null>(null);
+  const [touchStart, setTouchStart] = useState<{ x: number; y: number } | null>(null);
+  const [touchEnd, setTouchEnd] = useState<{ x: number; y: number } | null>(null);
 
   useEffect(() => {
     const loadPairs = async () => {
@@ -24,7 +26,29 @@ const PairsListScreen: React.FC = () => {
       if (useFirebase) {
         try {
           const userPairs = await getAllUserPairs(user.id);
-          setPairs(userPairs);
+          // Filter out archived pairs
+          const nonArchivedPairs = userPairs.filter(p => !p.archived);
+          setPairs(nonArchivedPairs);
+
+          // Load partner names for each pair
+          const names: Record<string, string> = {};
+          for (const pair of nonArchivedPairs) {
+            const partnerId = pair.userIds.find(id => id !== user.id);
+            if (partnerId) {
+              try {
+                const partner = await getUser(partnerId);
+                if (partner) {
+                  names[pair.id] = partner.displayName;
+                }
+              } catch (error) {
+                console.error('Failed to load partner name:', error);
+                names[pair.id] = 'Partner';
+              }
+            } else {
+              names[pair.id] = 'Waiting for Partner';
+            }
+          }
+          setPartnerNames(names);
         } catch (error) {
           console.error('Failed to load pairs:', error);
         }
@@ -49,22 +73,53 @@ const PairsListScreen: React.FC = () => {
     }
   };
 
-  const handleDeletePair = async () => {
-    if (!pairToDelete || !user) return;
+  const handleArchivePair = async (pairId: string) => {
+    if (!user) return;
 
     try {
-      await deletePairFirebase(pairToDelete, user.id);
-      // Also leave the pair if it's the active one
-      await leavePair();
-      // Reload pairs list
+      await archivePair(pairId);
+      // Reload pairs list (filter out archived)
       const userPairs = await getAllUserPairs(user.id);
-      setPairs(userPairs);
-      setShowDeleteModal(false);
-      setPairToDelete(null);
+      setPairs(userPairs.filter(p => !p.archived));
+      setSwipedPair(null);
     } catch (error) {
-      console.error('Failed to delete pair:', error);
-      alert(error instanceof Error ? error.message : 'Failed to delete pair');
+      console.error('Failed to archive pair:', error);
+      alert(error instanceof Error ? error.message : 'Failed to archive pair');
     }
+  };
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setTouchEnd(null);
+    setTouchStart({
+      x: e.targetTouches[0].clientX,
+      y: e.targetTouches[0].clientY
+    });
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    setTouchEnd({
+      x: e.targetTouches[0].clientX,
+      y: e.targetTouches[0].clientY
+    });
+  };
+
+  const handleTouchEnd = (pairId: string) => {
+    if (!touchStart || !touchEnd) return;
+
+    const deltaX = touchStart.x - touchEnd.x;
+    const deltaY = touchStart.y - touchEnd.y;
+    const minSwipeDistance = 50;
+
+    // Swipe left detected (deltaX positive means left swipe)
+    if (deltaX > minSwipeDistance && Math.abs(deltaY) < 100) {
+      setSwipedPair(pairId);
+    } else if (deltaX < -minSwipeDistance) {
+      // Swipe right - cancel
+      setSwipedPair(null);
+    }
+
+    setTouchStart(null);
+    setTouchEnd(null);
   };
 
   if (isLoading) {
@@ -94,47 +149,64 @@ const PairsListScreen: React.FC = () => {
           pairs.map((pair) => {
             const partnerId = pair.userIds.find(id => id !== user?.id);
             const isComplete = pair.userIds[0] && pair.userIds[1];
+            const isSwiped = swipedPair === pair.id;
 
             return (
               <div
                 key={pair.id}
-                className="w-full bg-base-200 rounded-lg p-4 shadow hover:shadow-lg transition-all border-2 border-transparent hover:border-primary"
+                className="relative overflow-hidden"
+                onTouchStart={handleTouchStart}
+                onTouchMove={handleTouchMove}
+                onTouchEnd={() => handleTouchEnd(pair.id)}
               >
-                <div className="flex items-center justify-between">
-                  <button
-                    onClick={() => handleSelectPair(pair.id)}
-                    className="flex items-center gap-3 flex-1 text-left"
-                  >
-                    <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
-                      <Users size={24} className="text-primary" />
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-text-main">
-                        {isComplete ? 'Active Pair' : 'Waiting for Partner'}
-                      </h3>
-                      <p className="text-sm text-text-muted flex items-center gap-1">
-                        <Calendar size={14} />
-                        {new Date(pair.createdAt).toLocaleDateString()}
-                      </p>
-                    </div>
-                  </button>
-                  <div className="flex items-center gap-3">
-                    <div className="text-right">
-                      <p className="text-xs text-text-muted">Code</p>
-                      <p className="font-mono font-semibold text-primary">{pair.inviteCode}</p>
-                    </div>
+                {/* Archive button revealed on swipe */}
+                {isSwiped && (
+                  <div className="absolute right-0 top-0 bottom-0 flex items-center bg-error px-6 rounded-r-xl">
                     <button
-                      onClick={() => {
-                        setPairToDelete(pair.id);
-                        setShowDeleteModal(true);
-                      }}
-                      className="p-2 hover:bg-red-500/20 rounded-lg transition-colors"
-                      title="Delete pair"
+                      onClick={() => handleArchivePair(pair.id)}
+                      className="text-white font-semibold flex items-center gap-2 active:scale-95 transition-transform duration-fast"
                     >
-                      <Trash2 size={20} className="text-red-500" />
+                      <Archive size={20} />
+                      Archive
                     </button>
                   </div>
-                </div>
+                )}
+
+                {/* Pair card - Modern iOS style */}
+                <button
+                  onClick={() => !isSwiped && handleSelectPair(pair.id)}
+                  className={`
+                    w-full glass rounded-xl p-4
+                    shadow-soft hover:shadow-elevated
+                    transition-all duration-base ease-ios
+                    text-left border border-base-300/50
+                    hover:border-primary/50
+                    active:scale-98
+                    ${isSwiped ? 'translate-x-[-120px]' : ''}
+                  `}
+                  style={{ transition: 'transform 0.3s ease' }}
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3 flex-1">
+                      <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center">
+                        <Users size={26} className="text-primary" strokeWidth={2.5} />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-lg text-text-main">
+                          {partnerNames[pair.id] || 'Loading...'}
+                        </h3>
+                        <p className="text-sm text-text-secondary flex items-center gap-1 mt-1">
+                          <Calendar size={14} />
+                          {new Date(pair.createdAt).toLocaleDateString()}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-xs text-text-muted mb-1">Code</p>
+                      <p className="font-mono text-lg font-bold text-primary">{pair.inviteCode}</p>
+                    </div>
+                  </div>
+                </button>
               </div>
             );
           })
@@ -159,12 +231,20 @@ const PairsListScreen: React.FC = () => {
           <LinkIcon size={20} />
           Join by Code
         </Button>
+
+        <button
+          onClick={() => navigate('/archive')}
+          className="w-full text-sm text-text-muted hover:text-text-main transition-colors flex items-center justify-center gap-1 py-2"
+        >
+          <Archive size={16} />
+          Archive
+        </button>
       </div>
 
-      {/* Join by Code Modal */}
+      {/* Join by Code Modal - iOS Style */}
       {showJoinModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-base-100 rounded-lg p-6 max-w-md w-full">
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fade-in">
+          <div className="glass rounded-3xl p-6 max-w-md w-full shadow-elevated border border-base-300/50 animate-slide-up">
             <h3 className="text-xl font-bold text-text-main mb-4">Join by Code</h3>
             <Input
               id="invite-code"
@@ -193,36 +273,6 @@ const PairsListScreen: React.FC = () => {
         </div>
       )}
 
-      {/* Delete Pair Confirmation Modal */}
-      {showDeleteModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-base-100 rounded-lg p-6 max-w-md w-full">
-            <h3 className="text-xl font-bold text-text-main mb-4">Delete Pair?</h3>
-            <p className="text-text-muted mb-6">
-              Are you sure you want to delete this pair? All words and progress will be lost.
-              This action cannot be undone.
-            </p>
-            <div className="flex gap-3">
-              <Button
-                onClick={handleDeletePair}
-                className="flex-1 bg-red-500 hover:bg-red-600"
-              >
-                Delete
-              </Button>
-              <Button
-                onClick={() => {
-                  setShowDeleteModal(false);
-                  setPairToDelete(null);
-                }}
-                variant="outline"
-                className="flex-1"
-              >
-                Cancel
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

@@ -13,60 +13,97 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Lingo Mingle</title>
     <style>
-      /* Meadow theme - Light purple/green */
+      /* Meadow theme - Modern iOS Light (Purple gradient) */
       :root.theme-meadow {
-        --color-primary: #a78bfa;
-        --color-secondary: #6ee7b7;
+        --color-primary: #6366f1;
+        --color-primary-dark: #4f46e5;
+        --color-secondary: #ec4899;
         --color-accent: #fde047;
+        --color-success: #10b981;
+        --color-warning: #f59e0b;
+        --color-error: #ef4444;
         --color-neutral: #4b5563;
-        --color-base-100: #f9fafb;
-        --color-base-200: #f3f4f6;
+        --color-base-100: #fafafa;
+        --color-base-200: #f5f5f5;
         --color-base-300: #e5e7eb;
-        --color-text-main: #111827;
-        --color-text-muted: #6b7280;
-        --color-primary-content: #ffffff;
-      }
-
-      /* Daybreak theme - Light orange/blue */
-      :root.theme-daybreak {
-        --color-primary: #fb923c;
-        --color-secondary: #60a5fa;
-        --color-accent: #f472b6;
-        --color-neutral: #44403c;
-        --color-base-100: #fffbeb;
-        --color-base-200: #fef3c7;
-        --color-base-300: #fee2e2;
-        --color-text-main: #1c1917;
-        --color-text-muted: #57534e;
-        --color-primary-content: #1c1917;
-      }
-
-      /* Twilight theme - Dark purple/teal */
-      :root.theme-twilight {
-        --color-primary: #818cf8;
-        --color-secondary: #2dd4bf;
-        --color-accent: #f471b5;
-        --color-neutral: #d1d5db;
-        --color-base-100: #1f2937;
-        --color-base-200: #111827;
-        --color-base-300: #030712;
-        --color-text-main: #f9fafb;
+        --color-surface: rgba(255, 255, 255, 0.8);
+        --color-text-main: #1f2937;
+        --color-text-secondary: #6b7280;
         --color-text-muted: #9ca3af;
         --color-primary-content: #ffffff;
       }
 
-      /* Forest theme - Dark green/yellow */
+      /* Daybreak theme - Modern iOS Light (Warm tones) */
+      :root.theme-daybreak {
+        --color-primary: #f59e0b;
+        --color-primary-dark: #d97706;
+        --color-secondary: #60a5fa;
+        --color-accent: #f472b6;
+        --color-success: #10b981;
+        --color-warning: #f59e0b;
+        --color-error: #ef4444;
+        --color-neutral: #44403c;
+        --color-base-100: #fafafa;
+        --color-base-200: #fef3c7;
+        --color-base-300: #fde68a;
+        --color-surface: rgba(255, 255, 255, 0.8);
+        --color-text-main: #1c1917;
+        --color-text-secondary: #78716c;
+        --color-text-muted: #a8a29e;
+        --color-primary-content: #ffffff;
+      }
+
+      /* Twilight theme - Modern iOS Dark (True Black) */
+      :root.theme-twilight {
+        --color-primary: #818cf8;
+        --color-primary-dark: #6366f1;
+        --color-secondary: #f472b6;
+        --color-accent: #2dd4bf;
+        --color-success: #34d399;
+        --color-warning: #fbbf24;
+        --color-error: #f87171;
+        --color-neutral: #d1d5db;
+        --color-base-100: #0f0f0f;
+        --color-base-200: #1a1a1a;
+        --color-base-300: #262626;
+        --color-surface: rgba(255, 255, 255, 0.05);
+        --color-text-main: #f9fafb;
+        --color-text-secondary: #d1d5db;
+        --color-text-muted: #9ca3af;
+        --color-primary-content: #ffffff;
+      }
+
+      /* Forest theme - Modern iOS Dark (Green accent) */
       :root.theme-forest {
-        --color-primary: #4ade80;
+        --color-primary: #34d399;
+        --color-primary-dark: #10b981;
         --color-secondary: #facc15;
         --color-accent: #e879f9;
+        --color-success: #34d399;
+        --color-warning: #fbbf24;
+        --color-error: #f87171;
         --color-neutral: #a8a29e;
-        --color-base-100: #292524;
+        --color-base-100: #0f0f0f;
         --color-base-200: #1c1917;
-        --color-base-300: #0c0a09;
+        --color-base-300: #292524;
+        --color-surface: rgba(255, 255, 255, 0.05);
         --color-text-main: #fafaf9;
+        --color-text-secondary: #d6d3d1;
         --color-text-muted: #a8a29e;
         --color-primary-content: #1c1917;
+      }
+
+      /* Glassmorphism utilities */
+      .glass {
+        background: var(--color-surface);
+        backdrop-filter: blur(20px) saturate(180%);
+        -webkit-backdrop-filter: blur(20px) saturate(180%);
+      }
+
+      .glass-heavy {
+        background: var(--color-surface);
+        backdrop-filter: blur(30px) saturate(180%);
+        -webkit-backdrop-filter: blur(30px) saturate(180%);
       }
     </style>
     <link rel="stylesheet" href="./index.css">
