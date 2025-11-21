@@ -75,12 +75,14 @@ const AddWordScreen: React.FC = () => {
   };
 
   return (
-    <div className="p-4">
-      <h2 className="text-2xl font-bold text-text-main mb-4">Add a New Word</h2>
-      <form onSubmit={handleSubmit} className="p-4 bg-base-200 rounded-lg shadow space-y-6">
+    <div className="p-6">
+      <h2 className="text-3xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent mb-6">
+        Add a New Word
+      </h2>
+      <form onSubmit={handleSubmit} className="glass-card rounded-3xl p-6 space-y-6">
         {error && (
-          <div className="text-red-500 text-sm p-3 bg-red-50 rounded-lg">
-            {error}
+          <div className="glass rounded-2xl p-4 border border-error/30">
+            <p className="text-error text-sm font-semibold">{error}</p>
           </div>
         )}
         <Input
