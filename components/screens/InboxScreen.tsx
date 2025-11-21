@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useData } from '../../contexts/DataContext';
 import { getUser } from '../../services/firebaseApi';
 import type { Entry } from '../../types';
-import { MessageSquare, ChevronRight, PlusCircle } from 'lucide-react';
+import { MessageSquare, ChevronRight, PlusCircle, Users } from 'lucide-react';
 import Button from '../ui/Button';
 
 const InboxScreen: React.FC = () => {
@@ -43,38 +43,44 @@ const InboxScreen: React.FC = () => {
 
   return (
     <div className="p-4 space-y-4">
-      <h2 className="text-2xl font-bold text-text-main">Inbox</h2>
+      <h2 className="text-3xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+        Inbox
+      </h2>
       {inboxEntries.length === 0 ? (
-        <div className="flex flex-col items-center justify-center text-center p-8 mt-16 bg-base-200 rounded-lg shadow">
-          <MessageSquare size={48} className="text-text-muted mb-4" />
-          <h3 className="text-lg font-semibold text-text-main">All caught up!</h3>
-          <p className="text-text-muted mb-6">Your inbox is empty. Why not add a new word for your partner?</p>
+        <div className="flex flex-col items-center justify-center text-center p-10 mt-16 glass-card rounded-3xl">
+          <div className="w-20 h-20 rounded-full bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center glow-primary mb-6">
+            <MessageSquare size={40} className="text-primary" strokeWidth={2.5} />
+          </div>
+          <h3 className="text-xl font-bold text-text-main mb-2">All caught up!</h3>
+          <p className="text-text-secondary mb-8">Your inbox is empty. Why not add a new word for your partner?</p>
           <div className="w-full max-w-xs">
-            <Button onClick={() => navigate('/add')} variant="secondary">
-              <span className="flex items-center justify-center">
-                <PlusCircle size={16} className="mr-2"/>
-                Add New Word
-              </span>
+            <Button onClick={() => navigate('/add')} variant="primary">
+              <PlusCircle size={20} className="mr-2"/>
+              Add New Word
             </Button>
           </div>
         </div>
       ) : (
-        <ul className="bg-base-200 rounded-lg shadow overflow-hidden">
+        <div className="space-y-3">
           {inboxEntries.map((entry: Entry) => (
-            <li key={entry.id} className="border-b border-base-300 last:border-b-0">
-              <button
-                onClick={() => navigate(`/inbox/complete/${entry.id}`)}
-                className="w-full flex items-center justify-between p-4 hover:bg-base-300 transition-colors text-left"
-              >
-                <div>
-                  <p className="font-semibold text-lg text-text-main">{entry.text_pivot}</p>
-                  <p className="text-sm text-text-muted">Added by {partnerName}</p>
+            <button
+              key={entry.id}
+              onClick={() => navigate(`/inbox/complete/${entry.id}`)}
+              className="w-full glass-card rounded-2xl p-5 hover:glow-primary transition-all duration-base ease-ios active:scale-98 text-left"
+            >
+              <div className="flex items-center justify-between relative z-10">
+                <div className="flex-1">
+                  <p className="font-bold text-xl text-text-main mb-1">{entry.text_pivot}</p>
+                  <p className="text-sm text-text-secondary flex items-center gap-1">
+                    <Users size={14} />
+                    Added by {partnerName}
+                  </p>
                 </div>
-                <ChevronRight size={20} className="text-text-muted" />
-              </button>
-            </li>
+                <ChevronRight size={24} className="text-text-muted" strokeWidth={2} />
+              </div>
+            </button>
           ))}
-        </ul>
+        </div>
       )}
     </div>
   );

@@ -172,24 +172,23 @@ const PairsListScreen: React.FC = () => {
                   </div>
                 )}
 
-                {/* Pair card - Modern iOS style */}
+                {/* Pair card - Liquid Glass iOS 26 style */}
                 <button
                   onClick={() => !isSwiped && handleSelectPair(pair.id)}
                   className={`
-                    w-full glass rounded-xl p-4
-                    shadow-soft hover:shadow-elevated
+                    w-full glass-card rounded-2xl p-5
+                    hover:glow-primary
                     transition-all duration-base ease-ios
-                    text-left border border-base-300/50
-                    hover:border-primary/50
+                    text-left
                     active:scale-98
                     ${isSwiped ? 'translate-x-[-120px]' : ''}
                   `}
                   style={{ transition: 'transform 0.3s ease' }}
                 >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3 flex-1">
-                      <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center">
-                        <Users size={26} className="text-primary" strokeWidth={2.5} />
+                  <div className="flex items-center justify-between relative z-10">
+                    <div className="flex items-center gap-4 flex-1">
+                      <div className="relative w-16 h-16 rounded-2xl bg-gradient-to-br from-primary/30 to-secondary/30 flex items-center justify-center glow-primary">
+                        <Users size={28} className="text-primary drop-shadow-lg" strokeWidth={2.5} />
                       </div>
                       <div>
                         <h3 className="font-semibold text-lg text-text-main">

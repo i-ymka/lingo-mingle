@@ -158,14 +158,18 @@ const StudyScreen: React.FC = () => {
 
   if (sessionComplete) {
     return (
-      <div className="flex flex-col items-center justify-center h-full p-6 text-center">
-        <BookOpen size={64} className="text-secondary mb-4" />
-        <h2 className="text-2xl font-bold">Great job!</h2>
-        <p className="text-text-muted mb-6">You've completed your study session for now.</p>
-        <div className="w-full max-w-xs">
-            <Button onClick={handleRestart} variant="secondary">
-              <span className="flex items-center justify-center"><Repeat size={16} className="mr-2"/> Study Again</span>
+      <div className="flex flex-col items-center justify-center h-full p-8 text-center">
+        <div className="glass-card rounded-3xl p-12 max-w-md">
+          <div className="w-24 h-24 rounded-full bg-gradient-to-br from-success/30 to-secondary/30 flex items-center justify-center glow-primary mb-6 mx-auto">
+            <BookOpen size={48} className="text-success" strokeWidth={2.5} />
+          </div>
+          <h2 className="text-3xl font-bold text-text-main mb-3">Great job!</h2>
+          <p className="text-text-secondary mb-8 text-lg">You've completed your study session for now.</p>
+          <div className="w-full">
+            <Button onClick={handleRestart} variant="primary">
+              <Repeat size={20} className="mr-2"/> Study Again
             </Button>
+          </div>
         </div>
       </div>
     );
@@ -176,25 +180,40 @@ const StudyScreen: React.FC = () => {
   }
 
   return (
-    <div className="p-4 flex flex-col h-full">
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-2xl font-bold text-text-main">Study Time</h2>
-        <p className="text-text-muted font-medium">{currentIndex + 1} / {dueCards.length}</p>
+    <div className="p-6 flex flex-col h-full">
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-3xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+          Study Time
+        </h2>
+        <div className="glass rounded-full px-4 py-2">
+          <p className="text-text-main font-bold">{currentIndex + 1} / {dueCards.length}</p>
+        </div>
       </div>
 
-      <div className="flex-grow flex items-center justify-center p-4 bg-base-200 rounded-xl shadow-lg mb-4 min-h-[250px]">
-        <div className="text-center">
+      <div className="flex-grow flex items-center justify-center p-8 glass-card rounded-3xl glow-primary mb-6 min-h-[300px] relative overflow-hidden">
+        {/* Shimmer effect overlay */}
+        <div className="absolute inset-0 shimmer opacity-20 pointer-events-none"></div>
+
+        <div className="text-center relative z-10">
           {side === 'front' ? frontContent : backContent}
         </div>
       </div>
 
       {side === 'front' ? (
-        <Button onClick={() => setSide('back')}>Show Answer</Button>
+        <Button onClick={() => setSide('back')}>
+          Show Answer
+        </Button>
       ) : (
         <div className="grid grid-cols-3 gap-3">
-          <Button onClick={() => handleDecision('dont_know')} variant="danger">Don't Know</Button>
-          <Button onClick={() => handleDecision('unsure')} variant="primary" className="bg-accent hover:opacity-90 focus:ring-accent">Unsure</Button>
-          <Button onClick={() => handleDecision('know')} variant="secondary">Know</Button>
+          <Button onClick={() => handleDecision('dont_know')} variant="danger">
+            Don't Know
+          </Button>
+          <Button onClick={() => handleDecision('unsure')} variant="secondary">
+            Unsure
+          </Button>
+          <Button onClick={() => handleDecision('know')} variant="primary">
+            Know!
+          </Button>
         </div>
       )}
     </div>

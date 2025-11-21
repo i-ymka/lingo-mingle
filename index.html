@@ -93,17 +93,112 @@
         --color-primary-content: #1c1917;
       }
 
-      /* Glassmorphism utilities */
+      /* Liquid Glass Effect (iOS 26 style) */
       .glass {
+        position: relative;
         background: var(--color-surface);
-        backdrop-filter: blur(20px) saturate(180%);
-        -webkit-backdrop-filter: blur(20px) saturate(180%);
+        backdrop-filter: blur(40px) saturate(200%) brightness(1.1);
+        -webkit-backdrop-filter: blur(40px) saturate(200%) brightness(1.1);
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        box-shadow:
+          0 8px 32px rgba(0, 0, 0, 0.12),
+          inset 0 1px 0 rgba(255, 255, 255, 0.15);
+      }
+
+      /* Glass with light reflection */
+      .glass::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 50%;
+        background: linear-gradient(
+          180deg,
+          rgba(255, 255, 255, 0.12) 0%,
+          rgba(255, 255, 255, 0) 100%
+        );
+        border-radius: inherit;
+        pointer-events: none;
       }
 
       .glass-heavy {
         background: var(--color-surface);
-        backdrop-filter: blur(30px) saturate(180%);
-        -webkit-backdrop-filter: blur(30px) saturate(180%);
+        backdrop-filter: blur(60px) saturate(200%) brightness(1.15);
+        -webkit-backdrop-filter: blur(60px) saturate(200%) brightness(1.15);
+        border: 1px solid rgba(255, 255, 255, 0.25);
+        box-shadow:
+          0 12px 48px rgba(0, 0, 0, 0.18),
+          inset 0 2px 0 rgba(255, 255, 255, 0.2),
+          inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+      }
+
+      /* Frosted card with glow */
+      .glass-card {
+        position: relative;
+        background: linear-gradient(
+          135deg,
+          rgba(255, 255, 255, 0.1) 0%,
+          rgba(255, 255, 255, 0.05) 100%
+        );
+        backdrop-filter: blur(30px) saturate(180%) brightness(1.1);
+        -webkit-backdrop-filter: blur(30px) saturate(180%) brightness(1.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        box-shadow:
+          0 8px 32px rgba(0, 0, 0, 0.1),
+          0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+      }
+
+      /* Glow effect for interactive elements */
+      .glow-primary {
+        box-shadow:
+          0 0 20px rgba(99, 102, 241, 0.4),
+          0 0 40px rgba(99, 102, 241, 0.2),
+          0 4px 16px rgba(0, 0, 0, 0.1);
+      }
+
+      .glow-primary:hover {
+        box-shadow:
+          0 0 30px rgba(99, 102, 241, 0.6),
+          0 0 60px rgba(99, 102, 241, 0.3),
+          0 8px 24px rgba(0, 0, 0, 0.15);
+      }
+
+      /* Shimmer effect */
+      @keyframes shimmer {
+        0% {
+          background-position: -200% center;
+        }
+        100% {
+          background-position: 200% center;
+        }
+      }
+
+      .shimmer {
+        background: linear-gradient(
+          90deg,
+          transparent 0%,
+          rgba(255, 255, 255, 0.3) 50%,
+          transparent 100%
+        );
+        background-size: 200% 100%;
+        animation: shimmer 3s infinite;
+      }
+
+      /* Light refraction border */
+      .refract-border {
+        border: 2px solid transparent;
+        background-image:
+          linear-gradient(var(--color-base-100), var(--color-base-100)),
+          linear-gradient(
+            135deg,
+            rgba(255, 255, 255, 0.4),
+            rgba(99, 102, 241, 0.3),
+            rgba(236, 72, 153, 0.3),
+            rgba(255, 255, 255, 0.4)
+          );
+        background-origin: border-box;
+        background-clip: padding-box, border-box;
       }
     </style>
     <link rel="stylesheet" href="./index.css">
