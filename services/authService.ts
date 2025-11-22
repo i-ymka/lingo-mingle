@@ -11,12 +11,22 @@ import {
 } from 'firebase/auth';
 
 /**
+ * Check if Firebase Auth is available
+ */
+const ensureAuth = () => {
+  if (!auth) {
+    throw new Error('Firebase Auth is not initialized. Make sure VITE_USE_FIREBASE=true is set.');
+  }
+  return auth;
+};
+
+/**
  * Sign in anonymously to Firebase
  * Creates a new anonymous user or retrieves existing one
  */
 export const signInAnonymously = async (): Promise<FirebaseUser> => {
   try {
-    const userCredential = await firebaseSignInAnonymously(auth);
+    const userCredential = await firebaseSignInAnonymously(ensureAuth());
     console.log('✅ Signed in anonymously:', userCredential.user.uid);
     return userCredential.user;
   } catch (error) {
@@ -30,7 +40,7 @@ export const signInAnonymously = async (): Promise<FirebaseUser> => {
  */
 export const signUpWithEmail = async (email: string, password: string): Promise<FirebaseUser> => {
   try {
-    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    const userCredential = await createUserWithEmailAndPassword(ensureAuth(), email, password);
     console.log('✅ Signed up with email:', userCredential.user.uid);
     return userCredential.user;
   } catch (error: any) {
@@ -51,7 +61,7 @@ export const signUpWithEmail = async (email: string, password: string): Promise<
  */
 export const signInWithEmail = async (email: string, password: string): Promise<FirebaseUser> => {
   try {
-    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    const userCredential = await signInWithEmailAndPassword(ensureAuth(), email, password);
     console.log('✅ Signed in with email:', userCredential.user.uid);
     return userCredential.user;
   } catch (error: any) {
@@ -75,7 +85,7 @@ export const signInWithEmail = async (email: string, password: string): Promise<
 export const signInWithGoogle = async (): Promise<FirebaseUser> => {
   try {
     const provider = new GoogleAuthProvider();
-    const userCredential = await signInWithPopup(auth, provider);
+    const userCredential = await signInWithPopup(ensureAuth(), provider);
     console.log('✅ Signed in with Google:', userCredential.user.uid);
     return userCredential.user;
   } catch (error: any) {
@@ -103,7 +113,7 @@ export const signInWithGoogle = async (): Promise<FirebaseUser> => {
  */
 export const signOut = async (): Promise<void> => {
   try {
-    await firebaseSignOut(auth);
+    await firebaseSignOut(ensureAuth());
     console.log('✅ Signed out successfully');
   } catch (error) {
     console.error('❌ Sign-out failed:', error);
@@ -113,24 +123,30 @@ export const signOut = async (): Promise<void> => {
 
 /**
  * Get current authenticated user
- * Returns null if no user is signed in
+ * Returns null if no user is signed in or Firebase is not initialized
  */
 export const getCurrentAuthUser = (): FirebaseUser | null => {
-  return auth.currentUser;
+  return auth?.currentUser || null;
 };
 
 /**
  * Listen to authentication state changes
  * Callback is called whenever user signs in or out
+ * Returns a no-op unsubscribe function if Firebase is not initialized
  */
 export const onAuthStateChanged = (callback: (user: FirebaseUser | null) => void): (() => void) => {
+  if (!auth) {
+    // Firebase not initialized, call callback with null immediately
+    callback(null);
+    return () => {}; // no-op unsubscribe
+  }
   return firebaseOnAuthStateChanged(auth, callback);
 };
 
 /**
  * Get current user's UID
- * Returns null if no user is authenticated
+ * Returns null if no user is authenticated or Firebase is not initialized
  */
 export const getCurrentUserId = (): string | null => {
-  return auth.currentUser?.uid || null;
+  return auth?.currentUser?.uid || null;
 };

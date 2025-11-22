@@ -1,7 +1,10 @@
-import { initializeApp } from 'firebase/app';
-import { getFirestore, enableIndexedDbPersistence } from 'firebase/firestore';
-import { getStorage } from 'firebase/storage';
-import { getAuth } from 'firebase/auth';
+import { initializeApp, FirebaseApp } from 'firebase/app';
+import { getFirestore, enableIndexedDbPersistence, Firestore } from 'firebase/firestore';
+import { getStorage, FirebaseStorage } from 'firebase/storage';
+import { getAuth, Auth } from 'firebase/auth';
+
+// Check if Firebase should be used
+const useFirebase = import.meta.env.VITE_USE_FIREBASE === 'true';
 
 // Firebase configuration from environment variables
 const firebaseConfig = {
@@ -13,27 +16,43 @@ const firebaseConfig = {
   appId: import.meta.env.VITE_FIREBASE_APP_ID
 };
 
-// Initialize Firebase
-export const app = initializeApp(firebaseConfig);
-export const db = getFirestore(app);
-export const storage = getStorage(app);
-export const auth = getAuth(app);
+// Lazy initialization - only initialize if Firebase is enabled
+let app: FirebaseApp | null = null;
+let db: Firestore | null = null;
+let storage: FirebaseStorage | null = null;
+let auth: Auth | null = null;
 
-// Enable offline persistence for Firestore
-enableIndexedDbPersistence(db).catch((err) => {
-  if (err.code === 'failed-precondition') {
-    console.warn('Multiple tabs open, persistence can only be enabled in one tab at a time.');
-  } else if (err.code === 'unimplemented') {
-    console.warn('The current browser does not support offline persistence');
-  } else {
-    console.error('Failed to enable offline persistence:', err);
+if (useFirebase) {
+  try {
+    // Initialize Firebase
+    app = initializeApp(firebaseConfig);
+    db = getFirestore(app);
+    storage = getStorage(app);
+    auth = getAuth(app);
+
+    // Enable offline persistence for Firestore
+    enableIndexedDbPersistence(db).catch((err) => {
+      if (err.code === 'failed-precondition') {
+        console.warn('Multiple tabs open, persistence can only be enabled in one tab at a time.');
+      } else if (err.code === 'unimplemented') {
+        console.warn('The current browser does not support offline persistence');
+      } else {
+        console.error('Failed to enable offline persistence:', err);
+      }
+    });
+
+    // Log Firebase initialization in development
+    if (import.meta.env.DEV) {
+      console.log('🔥 Firebase initialized:', {
+        projectId: firebaseConfig.projectId,
+        authDomain: firebaseConfig.authDomain
+      });
+    }
+  } catch (error) {
+    console.error('❌ Failed to initialize Firebase:', error);
   }
-});
-
-// Log Firebase initialization in development
-if (import.meta.env.DEV) {
-  console.log('🔥 Firebase initialized:', {
-    projectId: firebaseConfig.projectId,
-    authDomain: firebaseConfig.authDomain
-  });
+} else {
+  console.log('📦 Running in localStorage mode (Firebase disabled)');
 }
+
+export { app, db, storage, auth };

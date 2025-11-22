@@ -16,6 +16,16 @@ import {
 import type { Entry, EntryStatus, SrsDecision } from '../../types';
 
 /**
+ * Ensure Firestore is initialized
+ */
+const ensureDb = () => {
+  if (!db) {
+    throw new Error('Firestore is not initialized. Make sure VITE_USE_FIREBASE=true is set.');
+  }
+  return db;
+};
+
+/**
  * Generate a unique entry ID
  */
 const generateEntryId = (): string => {
@@ -44,8 +54,9 @@ export const createEntry = async (
   textPivot: string,
   createdBy: string
 ): Promise<Entry> => {
+  const database = ensureDb();
   const entryId = generateEntryId();
-  const entryRef = doc(db, 'entries', pairId, 'words', entryId);
+  const entryRef = doc(database, 'entries', pairId, 'words', entryId);
 
   const newEntry: Omit<Entry, 'id'> = {
     pairId,
@@ -83,7 +94,7 @@ export const createEntry = async (
  * Get all entries for a pair
  */
 export const getEntries = async (pairId: string): Promise<Entry[]> => {
-  const entriesRef = collection(db, 'entries', pairId, 'words');
+  const entriesRef = collection(ensureDb(), 'entries', pairId, 'words');
 
   try {
     const snapshot = await getDocs(query(entriesRef, orderBy('createdAtTimestamp', 'desc')));
@@ -121,7 +132,7 @@ export const getEntries = async (pairId: string): Promise<Entry[]> => {
  * Get a single entry by ID
  */
 export const getEntry = async (pairId: string, entryId: string): Promise<Entry | null> => {
-  const entryRef = doc(db, 'entries', pairId, 'words', entryId);
+  const entryRef = doc(ensureDb(), 'entries', pairId, 'words', entryId);
 
   try {
     const snapshot = await getDoc(entryRef);
@@ -162,7 +173,7 @@ export const updateEntry = async (
   entryId: string,
   updates: Partial<Entry>
 ): Promise<void> => {
-  const entryRef = doc(db, 'entries', pairId, 'words', entryId);
+  const entryRef = doc(ensureDb(), 'entries', pairId, 'words', entryId);
 
   try {
     await updateDoc(entryRef, {
@@ -187,7 +198,8 @@ export const updateEntryAudio = async (
   userRole: 'A' | 'B',
   audioData: string
 ): Promise<void> => {
-  const entryRef = doc(db, 'entries', pairId, 'words', entryId);
+  const database = ensureDb();
+  const entryRef = doc(database, 'entries', pairId, 'words', entryId);
   const audioField = userRole === 'A' ? 'audio_A_native' : 'audio_B_native';
 
   try {
@@ -225,7 +237,7 @@ export const updateEntryAudio = async (
  * Delete an entry
  */
 export const deleteEntry = async (pairId: string, entryId: string): Promise<void> => {
-  const entryRef = doc(db, 'entries', pairId, 'words', entryId);
+  const entryRef = doc(ensureDb(), 'entries', pairId, 'words', entryId);
 
   try {
     await deleteDoc(entryRef);
@@ -245,7 +257,8 @@ export const updateSRSData = async (
   userRole: 'A' | 'B',
   decision: SrsDecision
 ): Promise<void> => {
-  const entryRef = doc(db, 'entries', pairId, 'words', entryId);
+  const database = ensureDb();
+  const entryRef = doc(database, 'entries', pairId, 'words', entryId);
 
   try {
     const entrySnap = await getDoc(entryRef);
@@ -297,7 +310,8 @@ export const listenToEntries = (
   pairId: string,
   callback: (entries: Entry[]) => void
 ): (() => void) => {
-  const entriesRef = collection(db, 'entries', pairId, 'words');
+  const database = ensureDb();
+  const entriesRef = collection(database, 'entries', pairId, 'words');
   const q = query(entriesRef, orderBy('createdAtTimestamp', 'desc'));
 
   return onSnapshot(
@@ -340,7 +354,7 @@ export const getDueEntries = async (
   pairId: string,
   userRole: 'A' | 'B'
 ): Promise<Entry[]> => {
-  const entriesRef = collection(db, 'entries', pairId, 'words');
+  const entriesRef = collection(ensureDb(), 'entries', pairId, 'words');
   const now = new Date().toISOString();
 
   try {
