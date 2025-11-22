@@ -3,6 +3,16 @@ import { doc, getDoc, setDoc, updateDoc, deleteDoc, collection, query, where, ge
 import type { Pair } from '../../types';
 
 /**
+ * Ensure Firestore is initialized
+ */
+const ensureDb = () => {
+  if (!db) {
+    throw new Error('Firestore is not initialized. Make sure VITE_USE_FIREBASE=true is set.');
+  }
+  return db;
+};
+
+/**
  * Generate a random 6-digit invite code
  */
 const generateInviteCode = (): string => {
@@ -20,10 +30,11 @@ const generateId = (): string => {
  * Create a new pair
  */
 export const createPair = async (userId: string): Promise<Pair> => {
+  const database = ensureDb();
   const pairId = generateId();
   const inviteCode = generateInviteCode();
-  const pairRef = doc(db, 'pairs', pairId);
-  const inviteCodeRef = doc(db, 'inviteCodes', inviteCode);
+  const pairRef = doc(database, 'pairs', pairId);
+  const inviteCodeRef = doc(database, 'inviteCodes', inviteCode);
 
   // Invite code expires in 5 minutes
   const expiresAt = new Date(Date.now() + 5 * 60 * 1000);
@@ -68,9 +79,10 @@ export const createPair = async (userId: string): Promise<Pair> => {
  * Join an existing pair using invite code
  */
 export const joinPair = async (userId: string, inviteCode: string): Promise<Pair | null> => {
+  const database = ensureDb();
   try {
     // Find pair by invite code
-    const inviteCodeRef = doc(db, 'inviteCodes', inviteCode);
+    const inviteCodeRef = doc(database, 'inviteCodes', inviteCode);
     const inviteCodeSnap = await getDoc(inviteCodeRef);
 
     if (!inviteCodeSnap.exists()) {
@@ -94,7 +106,7 @@ export const joinPair = async (userId: string, inviteCode: string): Promise<Pair
     }
 
     const pairId = inviteCodeData.pairId;
-    const pairRef = doc(db, 'pairs', pairId);
+    const pairRef = doc(database, 'pairs', pairId);
     const pairSnap = await getDoc(pairRef);
 
     if (!pairSnap.exists()) {
@@ -147,7 +159,7 @@ export const joinPair = async (userId: string, inviteCode: string): Promise<Pair
  * Get pair by ID
  */
 export const getPair = async (pairId: string): Promise<Pair | null> => {
-  const pairRef = doc(db, 'pairs', pairId);
+  const pairRef = doc(ensureDb(), 'pairs', pairId);
 
   try {
     const pairSnap = await getDoc(pairRef);
@@ -177,7 +189,7 @@ export const getPair = async (pairId: string): Promise<Pair | null> => {
  */
 export const getPairByInviteCode = async (inviteCode: string): Promise<Pair | null> => {
   try {
-    const inviteCodeRef = doc(db, 'inviteCodes', inviteCode);
+    const inviteCodeRef = doc(ensureDb(), 'inviteCodes', inviteCode);
     const inviteCodeSnap = await getDoc(inviteCodeRef);
 
     if (!inviteCodeSnap.exists()) {
@@ -197,7 +209,7 @@ export const getPairByInviteCode = async (inviteCode: string): Promise<Pair | nu
  */
 export const getAllUserPairs = async (userId: string): Promise<Pair[]> => {
   try {
-    const pairsRef = collection(db, 'pairs');
+    const pairsRef = collection(ensureDb(), 'pairs');
     const q = query(pairsRef, where('userIds', 'array-contains', userId));
     const querySnapshot = await getDocs(q);
 
@@ -230,7 +242,7 @@ export const listenToPair = (
   pairId: string,
   callback: (pair: Pair | null) => void
 ): (() => void) => {
-  const pairRef = doc(db, 'pairs', pairId);
+  const pairRef = doc(ensureDb(), 'pairs', pairId);
 
   return onSnapshot(
     pairRef,
@@ -263,7 +275,7 @@ export const listenToPair = (
  */
 export const archivePair = async (pairId: string): Promise<void> => {
   try {
-    const pairRef = doc(db, 'pairs', pairId);
+    const pairRef = doc(ensureDb(), 'pairs', pairId);
     await updateDoc(pairRef, {
       archived: true,
       updatedAt: Timestamp.now(),
@@ -280,7 +292,7 @@ export const archivePair = async (pairId: string): Promise<void> => {
  */
 export const unarchivePair = async (pairId: string): Promise<void> => {
   try {
-    const pairRef = doc(db, 'pairs', pairId);
+    const pairRef = doc(ensureDb(), 'pairs', pairId);
     await updateDoc(pairRef, {
       archived: false,
       updatedAt: Timestamp.now(),
@@ -298,8 +310,9 @@ export const unarchivePair = async (pairId: string): Promise<void> => {
  * If there's a partner, just remove current user from the pair
  */
 export const deletePair = async (pairId: string, userId: string): Promise<void> => {
+  const database = ensureDb();
   try {
-    const pairRef = doc(db, 'pairs', pairId);
+    const pairRef = doc(database, 'pairs', pairId);
     const pairSnap = await getDoc(pairRef);
 
     if (!pairSnap.exists()) {

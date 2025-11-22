@@ -3,6 +3,16 @@ import { doc, getDoc, setDoc, updateDoc, onSnapshot, Timestamp } from 'firebase/
 import type { User, Language } from '../../types';
 
 /**
+ * Ensure Firestore is initialized
+ */
+const ensureDb = () => {
+  if (!db) {
+    throw new Error('Firestore is not initialized. Make sure VITE_USE_FIREBASE=true is set.');
+  }
+  return db;
+};
+
+/**
  * Create a new user in Firestore
  */
 export const createUser = async (
@@ -11,7 +21,7 @@ export const createUser = async (
   nativeLang: Language,
   pivotLang: Language
 ): Promise<User> => {
-  const userRef = doc(db, 'users', authId);
+  const userRef = doc(ensureDb(), 'users', authId);
 
   const newUser: User = {
     id: authId,
@@ -43,7 +53,7 @@ export const createUser = async (
  * Get user by ID
  */
 export const getUser = async (userId: string): Promise<User | null> => {
-  const userRef = doc(db, 'users', userId);
+  const userRef = doc(ensureDb(), 'users', userId);
 
   try {
     const userSnap = await getDoc(userRef);
@@ -71,7 +81,7 @@ export const getUser = async (userId: string): Promise<User | null> => {
  * Update user data
  */
 export const updateUser = async (userId: string, updates: Partial<User>): Promise<void> => {
-  const userRef = doc(db, 'users', userId);
+  const userRef = doc(ensureDb(), 'users', userId);
 
   try {
     // Filter out undefined values as Firestore doesn't support them
@@ -100,7 +110,8 @@ export const listenToUser = (
   userId: string,
   callback: (user: User | null) => void
 ): (() => void) => {
-  const userRef = doc(db, 'users', userId);
+  const database = ensureDb();
+  const userRef = doc(database, 'users', userId);
 
   return onSnapshot(
     userRef,
