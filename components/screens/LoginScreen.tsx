@@ -99,7 +99,7 @@ const LoginScreen: React.FC = () => {
           </div>
         )}
 
-        <div className="space-y-3">
+        <div className="space-y-3 mt-2">
           <Button type="submit" disabled={isLoading}>
             <LogIn size={20} />
             {isLoading ? 'Signing in...' : 'Sign In'}
