@@ -1,45 +1,45 @@
-Lingo Mingle — офлайн PWA для пары
-=================================
+Lingo Mingle — Offline PWA for Language Learning Pairs
+=======================================================
 
-Мини‑приложение для изучения слов вместе с партнёром. Работает как офлайн‑PWA: можно установить с Safari на экран Домой и пользоваться без интернета.
+A mini-application for learning vocabulary together with a partner. Works as an offline PWA: you can install it from Safari to the Home Screen and use it without internet.
 
-Сделано на: React + TypeScript + Vite + Tailwind (локальная сборка). Без внешних CDN.
+Built with: React + TypeScript + Vite + Tailwind (local build). No external CDN.
 
-Возможности
-- Офлайн‑режим: весь интерфейс и ресурсы кэшируются сервис‑воркером.
-- Локальное хранение: данные сохраняются в `localStorage` на устройстве.
-- Лёгкая установка на iPhone/Android как PWA (значок на Домой, полноэкранный режим).
+Features
+- Offline mode: all UI and assets are cached by the service worker.
+- Local storage: data is saved in `localStorage` on the device.
+- Easy installation on iPhone/Android as a PWA (Home Screen icon, fullscreen mode).
 
-Локальная разработка
-- Установка зависимостей: `npm ci` (или `npm install`)
-- Запуск дев‑сервера: `npm run dev`
-- Продакшн‑сборка: `npm run build` (файлы в `dist/`)
+Local Development
+- Install dependencies: `npm ci` (or `npm install`)
+- Start dev server: `npm run dev`
+- Production build: `npm run build` (files in `dist/`)
 
-Деплой на GitHub Pages (настроено)
-1) Репозиторий уже содержит GitHub Actions: `.github/workflows/deploy.yml`.
-2) В `Settings → Pages` выбери Source: GitHub Actions (уже сделано).
-3) Любой пуш в ветку `main` автоматически:
-   - собирает проект (`npm run build`)
-   - публикует содержимое `dist/` на GitHub Pages
-4) Готовый URL появится в `Settings → Pages` и в выводе Actions.
+Deploy to GitHub Pages (pre-configured)
+1) The repository already contains GitHub Actions: `.github/workflows/deploy.yml`.
+2) In `Settings → Pages` select Source: GitHub Actions (already configured).
+3) Any push to the `main` branch automatically:
+   - builds the project (`npm run build`)
+   - publishes the contents of `dist/` to GitHub Pages
+4) The ready URL will appear in `Settings → Pages` and in the Actions output.
 
-Установка как PWA на iPhone
-1) Открой сайт в Safari по адресу GitHub Pages.
-2) Нажми «Поделиться» → «На экран Домой».
-3) Первый запуск сделай онлайн (для первичного кэша), далее работает офлайн.
+Install as PWA on iPhone
+1) Open the site in Safari at the GitHub Pages URL.
+2) Tap "Share" → "Add to Home Screen".
+3) First launch should be online (to prime the cache), then it works offline.
 
-Заметки по офлайну
-- В проекте добавлены `public/manifest.webmanifest` и `public/service-worker.js`.
-- Регистрация сервис‑воркера — в `index.tsx`.
-- Путь для GitHub Pages (подпапка) учтён: `vite.config.ts` с `base: './'` и относительные ссылки в `index.html`.
+Offline Notes
+- The project includes `public/manifest.webmanifest` and `public/service-worker.js`.
+- Service worker registration is in `index.tsx`.
+- GitHub Pages subfolder path is handled: `vite.config.ts` with `base: './'` and relative links in `index.html`.
 
-Иконки и сплэш
-- Пользовательские иконки лежат в `public/icons` (192, 512 и apple-touch 180). При желании можно заменить их своими PNG с теми же именами.
-- Фотографии для заставки лежат в `assets/hero`. Все снимки взяты с Pexels (бесплатная лицензия, авторские указания не обязательны, но приветствуются при замене).
+Icons & Splash
+- Custom icons are in `public/icons` (192, 512 and apple-touch 180). You can replace them with your own PNGs using the same filenames.
+- Splash screen photos are in `assets/hero`. All photos are from Pexels (free license, attribution not required but appreciated if you replace them).
 
 FAQ
-- Можно ли установить «как файл» на iPhone без аккаунта разработчика? Нет. Но PWA ставится на Домой и работает офлайн, что покрывает большинство сценариев.
-- Почему нет внешних ссылок на CDN? Чтобы приложение было полностью офлайн.
+- Can I install it "as a file" on iPhone without a developer account? No. But a PWA can be added to the Home Screen and works offline, which covers most use cases.
+- Why no external CDN links? So the app works completely offline.
 
-Лицензия
-- Частное использование. Не добавляйте чувствительные ключи в репозиторий.
+License
+- Private use. Do not add sensitive keys to the repository.
