@@ -25,6 +25,8 @@ dist-ssr
 
 # Development documentation (local only)
 claude-local.md
+claude.md
+design-spec.md
 
 # Environment variables
 .env.local
