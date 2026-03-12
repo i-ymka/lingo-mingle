@@ -28,6 +28,11 @@ claude-local.md
 claude.md
 design-spec.md
 
+# Test / dev scripts (not needed for production)
+test-firebase.ts
+config/firebase.test.ts
+metadata.json
+
 # Environment variables
 .env.local
 .env
