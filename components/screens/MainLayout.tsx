@@ -33,18 +33,18 @@ const CentralNavItem: React.FC<{ item: typeof navItems[0] }> = ({ item }) => {
 }
 
 const StandardNavItem: React.FC<{ item: typeof navItems[0] }> = ({ item }) => {
+    const location = useLocation();
+    const isActive = location.pathname.startsWith(item.path);
     return (
         <NavLink
         to={item.path}
-        className={({ isActive }) =>
-          `flex flex-col items-center justify-center gap-1 w-full py-2
+        className={`flex flex-col items-center justify-center gap-1 w-full py-2
            transition-all duration-base ease-ios
            min-h-touch ${
             isActive
               ? 'text-primary scale-105'
               : 'text-text-muted hover:text-primary active:scale-95'
-          }`
-        }
+          }`}
       >
         <item.icon size={24} strokeWidth={isActive ? 2.5 : 2} />
         <span className="text-xs font-semibold">{item.label}</span>
