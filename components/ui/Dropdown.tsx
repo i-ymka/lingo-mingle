@@ -37,7 +37,10 @@ const Dropdown: React.FC<DropdownProps> = ({ trigger, children }) => {
       </div>
 
       {isOpen && (
-        <div className="origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-base-100 ring-1 ring-base-300 ring-opacity-5 focus:outline-none z-10">
+        <div
+          className="origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-base-100 ring-1 ring-base-300 ring-opacity-5 focus:outline-none z-50"
+          onClick={() => setIsOpen(false)}
+        >
           <div className="py-1" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
             {children}
           </div>
