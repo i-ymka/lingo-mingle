@@ -31,14 +31,6 @@ jobs:
         run: npm ci
 
       - name: Build
-        env:
-          VITE_FIREBASE_API_KEY: AIzaSyAF2BISBriMTxRBqAB14U4DazSmsp261u0
-          VITE_FIREBASE_AUTH_DOMAIN: lingo-mingle.firebaseapp.com
-          VITE_FIREBASE_PROJECT_ID: lingo-mingle
-          VITE_FIREBASE_STORAGE_BUCKET: lingo-mingle.firebasestorage.app
-          VITE_FIREBASE_MESSAGING_SENDER_ID: 343161603560
-          VITE_FIREBASE_APP_ID: 1:343161603560:web:1c2f23105aa35f7b0dd05d
-          VITE_USE_FIREBASE: true
         run: npm run build
         env:
           VITE_USE_FIREBASE: "true"
