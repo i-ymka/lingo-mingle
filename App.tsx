@@ -1,5 +1,22 @@
-import React, { Suspense, lazy } from 'react';
+import React, { Suspense, lazy, Component, ReactNode } from 'react';
 import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
+
+class ErrorBoundary extends Component<{ children: ReactNode }, { error: Error | null }> {
+  state = { error: null };
+  static getDerivedStateFromError(error: Error) { return { error }; }
+  render() {
+    if (this.state.error) {
+      return (
+        <div className="h-screen flex flex-col items-center justify-center p-6 bg-white text-center">
+          <p className="text-red-500 font-bold mb-2">Something went wrong</p>
+          <pre className="text-xs text-gray-600 whitespace-pre-wrap max-w-sm">{(this.state.error as Error).message}</pre>
+          <button className="mt-4 px-4 py-2 bg-blue-500 text-white rounded" onClick={() => window.location.reload()}>Reload</button>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
 import { DataProvider, useData } from './contexts/DataContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { useDefaultScreen } from './hooks/useDefaultScreen';
@@ -24,11 +41,13 @@ const ArchiveScreen = lazy(() => import('./components/screens/ArchiveScreen'));
 
 const App: React.FC = () => {
   return (
-    <ThemeProvider>
-      <DataProvider>
-        <AppRouter />
-      </DataProvider>
-    </ThemeProvider>
+    <ErrorBoundary>
+      <ThemeProvider>
+        <DataProvider>
+          <AppRouter />
+        </DataProvider>
+      </ThemeProvider>
+    </ErrorBoundary>
   );
 };
 
