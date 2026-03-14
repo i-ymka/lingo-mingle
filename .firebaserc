@@ -1,0 +1,15 @@
+{
+  "projects": {
+    "default": "lingo-mingle"
+  },
+  "targets": {
+    "lingo-mingle": {
+      "storage": {
+        "default": [
+          "lingo-mingle.firebasestorage.app"
+        ]
+      }
+    }
+  },
+  "etags": {}
+}

@@ -1,4 +1,5 @@
 import { db } from '../../config/firebase';
+import { uploadAudio } from './storageService';
 import {
   collection,
   doc,
@@ -190,7 +191,8 @@ export const updateEntry = async (
 };
 
 /**
- * Update entry audio for a specific user
+ * Update entry audio for a specific user.
+ * Uploads audio to Firebase Storage and stores the download URL in Firestore.
  */
 export const updateEntryAudio = async (
   pairId: string,
@@ -203,32 +205,28 @@ export const updateEntryAudio = async (
   const audioField = userRole === 'A' ? 'audio_A_native' : 'audio_B_native';
 
   try {
-    // Get current entry to determine new status
     const entrySnap = await getDoc(entryRef);
     if (!entrySnap.exists()) {
       throw new Error('Entry not found');
     }
 
+    // Upload to Storage, get URL
+    const audioUrl = await uploadAudio(pairId, entryId, userRole, audioData);
+
     const currentData = entrySnap.data();
     const otherAudioField = userRole === 'A' ? 'audio_B_native' : 'audio_A_native';
     const hasOtherAudio = currentData[otherAudioField];
 
-    // Determine new status
-    let newStatus: EntryStatus = 'waiting_partner_audio';
-    if (hasOtherAudio) {
-      newStatus = 'ready';
-    }
+    const newStatus: EntryStatus = hasOtherAudio ? 'ready' : 'waiting_partner_audio';
 
     await updateDoc(entryRef, {
-      [audioField]: audioData,
+      [audioField]: audioUrl,
       status: newStatus,
       updatedAt: new Date().toISOString(),
       updatedAtTimestamp: Timestamp.now(),
     });
-
-    console.log('✅ Entry audio updated:', entryId);
   } catch (error) {
-    console.error('❌ Failed to update entry audio:', error);
+    console.error('Failed to update entry audio:', error);
     throw new Error('Failed to update entry audio');
   }
 };

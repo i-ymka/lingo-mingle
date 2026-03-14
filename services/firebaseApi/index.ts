@@ -2,3 +2,4 @@
 export * from './userService';
 export * from './pairService';
 export * from './entryService';
+export * from './storageService';

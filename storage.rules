@@ -1,0 +1,23 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isPairMember(pairId) {
+      let pair = firestore.get(/databases/(default)/documents/pairs/$(pairId));
+      return request.auth.uid in pair.data.userIds;
+    }
+
+    match /audio/{pairId}/{entryId}/{audioFile} {
+      allow read: if isAuthenticated() && isPairMember(pairId);
+      allow write: if isAuthenticated()
+        && isPairMember(pairId)
+        && request.resource.size < 10 * 1024 * 1024
+        && request.resource.contentType.matches('audio/.*');
+      allow delete: if isAuthenticated() && isPairMember(pairId);
+    }
+  }
+}

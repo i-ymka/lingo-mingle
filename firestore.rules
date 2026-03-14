@@ -1,0 +1,48 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return request.auth.uid == userId;
+    }
+
+    function isPairMember(pairId) {
+      let pair = get(/databases/$(database)/documents/pairs/$(pairId));
+      return request.auth.uid in pair.data.userIds;
+    }
+
+    // Users — any logged-in user can read (to load partner profile)
+    match /users/{userId} {
+      allow read: if isAuthenticated();
+      allow create: if isOwner(userId);
+      allow update: if isOwner(userId);
+      allow delete: if false;
+    }
+
+    // Pairs — only members can read; any user can create; members can update
+    match /pairs/{pairId} {
+      allow read: if isAuthenticated() && isPairMember(pairId);
+      allow create: if isAuthenticated();
+      allow update: if isAuthenticated() && isPairMember(pairId);
+      allow delete: if false;
+    }
+
+    // Invite codes — any user can read/create (needed for join flow)
+    // Update only if not already used (prevents double-join)
+    match /inviteCodes/{code} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated();
+      allow update: if isAuthenticated() && resource.data.used == false;
+      allow delete: if false;
+    }
+
+    // Entries — only pair members
+    match /entries/{pairId}/words/{entryId} {
+      allow read, write: if isAuthenticated() && isPairMember(pairId);
+    }
+  }
+}
