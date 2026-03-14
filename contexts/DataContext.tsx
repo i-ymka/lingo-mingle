@@ -275,8 +275,8 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const leavePair = async () => {
     if (useFirebase && user) {
-      // Firebase: Clear activePairId
-      await firebaseApi.updateUser(user.id, { activePairId: undefined, role: undefined });
+      // Firebase: Delete activePairId and role fields via deleteField()
+      await firebaseApi.clearUserPair(user.id);
     } else if (user) {
       // localStorage: Clear activePairId
       api.updateUser({ ...user, activePairId: undefined, role: undefined });
