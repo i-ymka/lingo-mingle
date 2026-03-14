@@ -33,11 +33,25 @@ import AddWordScreen from './components/screens/AddWordScreen';
 import AllWordsScreen from './components/screens/AllWordsScreen';
 import CompleteWordScreen from './components/screens/CompleteWordScreen';
 
-// Lazy-loaded screens (less frequent, StatsScreen is heavy due to Recharts)
-const StatsScreen = lazy(() => import('./components/screens/StatsScreen'));
-const SettingsScreen = lazy(() => import('./components/screens/SettingsScreen'));
-const ProfileScreen = lazy(() => import('./components/screens/ProfileScreen'));
-const ArchiveScreen = lazy(() => import('./components/screens/ArchiveScreen'));
+// Lazy-loaded screens with stale-chunk recovery:
+// if the SW serves a stale index.html and the new chunk hash is missing,
+// reload once to pick up the latest SW and correct chunk URLs.
+const lazyWithReload = (factory: () => Promise<{ default: React.ComponentType<any> }>) =>
+  lazy(() =>
+    factory().catch((e) => {
+      const reloaded = sessionStorage.getItem('chunk-reload');
+      if (!reloaded) {
+        sessionStorage.setItem('chunk-reload', '1');
+        window.location.reload();
+      }
+      throw e;
+    })
+  );
+
+const StatsScreen = lazyWithReload(() => import('./components/screens/StatsScreen'));
+const SettingsScreen = lazyWithReload(() => import('./components/screens/SettingsScreen'));
+const ProfileScreen = lazyWithReload(() => import('./components/screens/ProfileScreen'));
+const ArchiveScreen = lazyWithReload(() => import('./components/screens/ArchiveScreen'));
 
 const App: React.FC = () => {
   return (

@@ -1,5 +1,5 @@
 import { db } from '../../config/firebase';
-import { doc, getDoc, setDoc, updateDoc, onSnapshot, Timestamp } from 'firebase/firestore';
+import { doc, getDoc, setDoc, updateDoc, deleteField, onSnapshot, Timestamp } from 'firebase/firestore';
 import type { User, Language } from '../../types';
 
 /**
@@ -101,6 +101,18 @@ export const updateUser = async (userId: string, updates: Partial<User>): Promis
     console.error('❌ Failed to update user:', error);
     throw new Error('Failed to update user');
   }
+};
+
+/**
+ * Remove pair association from user (activePairId + role)
+ */
+export const clearUserPair = async (userId: string): Promise<void> => {
+  const userRef = doc(ensureDb(), 'users', userId);
+  await updateDoc(userRef, {
+    activePairId: deleteField(),
+    role: deleteField(),
+    updatedAt: Timestamp.now(),
+  });
 };
 
 /**

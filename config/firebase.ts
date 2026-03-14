@@ -1,5 +1,5 @@
 import { initializeApp, FirebaseApp } from 'firebase/app';
-import { getFirestore, enableIndexedDbPersistence, Firestore } from 'firebase/firestore';
+import { initializeFirestore, persistentLocalCache, Firestore } from 'firebase/firestore';
 import { getStorage, FirebaseStorage } from 'firebase/storage';
 import { getAuth, Auth } from 'firebase/auth';
 
@@ -26,20 +26,9 @@ if (useFirebase) {
   try {
     // Initialize Firebase
     app = initializeApp(firebaseConfig);
-    db = getFirestore(app);
+    db = initializeFirestore(app, { localCache: persistentLocalCache() });
     storage = getStorage(app);
     auth = getAuth(app);
-
-    // Enable offline persistence for Firestore
-    enableIndexedDbPersistence(db).catch((err) => {
-      if (err.code === 'failed-precondition') {
-        console.warn('Multiple tabs open, persistence can only be enabled in one tab at a time.');
-      } else if (err.code === 'unimplemented') {
-        console.warn('The current browser does not support offline persistence');
-      } else {
-        console.error('Failed to enable offline persistence:', err);
-      }
-    });
 
     // Log Firebase initialization in development
     if (import.meta.env.DEV) {
