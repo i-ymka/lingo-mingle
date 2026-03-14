@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Suspense, lazy } from 'react';
 import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { DataProvider, useData } from './contexts/DataContext';
 import { ThemeProvider } from './contexts/ThemeContext';
@@ -13,12 +13,14 @@ import MainLayout from './components/screens/MainLayout';
 import InboxScreen from './components/screens/InboxScreen';
 import StudyScreen from './components/screens/StudyScreen';
 import AddWordScreen from './components/screens/AddWordScreen';
-import StatsScreen from './components/screens/StatsScreen';
 import AllWordsScreen from './components/screens/AllWordsScreen';
 import CompleteWordScreen from './components/screens/CompleteWordScreen';
-import SettingsScreen from './components/screens/SettingsScreen';
-import ProfileScreen from './components/screens/ProfileScreen';
-import ArchiveScreen from './components/screens/ArchiveScreen';
+
+// Lazy-loaded screens (less frequent, StatsScreen is heavy due to Recharts)
+const StatsScreen = lazy(() => import('./components/screens/StatsScreen'));
+const SettingsScreen = lazy(() => import('./components/screens/SettingsScreen'));
+const ProfileScreen = lazy(() => import('./components/screens/ProfileScreen'));
+const ArchiveScreen = lazy(() => import('./components/screens/ArchiveScreen'));
 
 const App: React.FC = () => {
   return (
@@ -54,6 +56,7 @@ const AppRouter: React.FC = () => {
   return (
     <div className="h-screen w-screen max-w-md mx-auto bg-base-100 text-text-main font-sans flex flex-col shadow-2xl">
       <HashRouter>
+        <Suspense fallback={<div className="flex items-center justify-center h-full"><div className="animate-spin rounded-full h-10 w-10 border-b-4 border-primary" /></div>}>
         <Routes>
           {!user ? (
             <>
@@ -93,6 +96,7 @@ const AppRouter: React.FC = () => {
             </Route>
           )}
         </Routes>
+        </Suspense>
       </HashRouter>
     </div>
   );

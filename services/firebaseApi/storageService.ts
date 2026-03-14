@@ -6,6 +6,11 @@ import {
   deleteObject,
 } from 'firebase/storage';
 
+const ensureStorage = () => {
+  if (!storage) throw new Error('Firebase Storage is not initialized. Make sure VITE_USE_FIREBASE=true is set.');
+  return storage;
+};
+
 /**
  * Convert a base64 data URL to a Blob
  */
@@ -44,7 +49,7 @@ export const uploadAudio = async (
   const { blob, mimeType } = base64ToBlob(base64Audio);
   const ext = getExtension(mimeType);
   const path = `audio/${pairId}/${entryId}/audio_${role}.${ext}`;
-  const storageRef = ref(storage, path);
+  const storageRef = ref(ensureStorage(), path);
 
   await uploadBytes(storageRef, blob, { contentType: mimeType });
   const url = await getDownloadURL(storageRef);
@@ -65,7 +70,7 @@ export const deleteAudio = async (
   for (const ext of extensions) {
     try {
       const path = `audio/${pairId}/${entryId}/audio_${role}.${ext}`;
-      await deleteObject(ref(storage, path));
+      await deleteObject(ref(ensureStorage(), path));
       return;
     } catch {
       // File with this extension doesn't exist, try next

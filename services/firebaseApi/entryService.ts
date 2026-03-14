@@ -1,5 +1,5 @@
 import { db } from '../../config/firebase';
-import { uploadAudio } from './storageService';
+import { uploadAudio, deleteEntryAudio } from './storageService';
 import {
   collection,
   doc,
@@ -238,10 +238,12 @@ export const deleteEntry = async (pairId: string, entryId: string): Promise<void
   const entryRef = doc(ensureDb(), 'entries', pairId, 'words', entryId);
 
   try {
-    await deleteDoc(entryRef);
-    console.log('✅ Entry deleted:', entryId);
+    await Promise.all([
+      deleteDoc(entryRef),
+      deleteEntryAudio(pairId, entryId),
+    ]);
   } catch (error) {
-    console.error('❌ Failed to delete entry:', error);
+    console.error('Failed to delete entry:', error);
     throw new Error('Failed to delete entry');
   }
 };
