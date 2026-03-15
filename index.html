@@ -13,190 +13,163 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Lingo Mingle</title>
     <style>
-      /* Meadow theme - Modern iOS Light (Purple gradient) */
+      /* ─── Meadow — Light Violet (default) ───────────────────────────── */
       :root.theme-meadow {
-        --color-primary: #6366f1;
-        --color-primary-dark: #4f46e5;
+        --color-primary: #7c3aed;
+        --color-primary-dark: #6d28d9;
         --color-secondary: #ec4899;
-        --color-accent: #fde047;
+        --color-accent: #f59e0b;
         --color-success: #10b981;
         --color-warning: #f59e0b;
         --color-error: #ef4444;
         --color-neutral: #4b5563;
-        --color-base-100: #fafafa;
-        --color-base-200: #f5f5f5;
-        --color-base-300: #e5e7eb;
-        --color-surface: rgba(255, 255, 255, 0.8);
-        --color-text-main: #1f2937;
-        --color-text-secondary: #6b7280;
-        --color-text-muted: #9ca3af;
+        --color-base-100: #f8f7ff;
+        --color-base-200: #ede9fe;
+        --color-base-300: #ddd6fe;
+        --color-surface: rgba(255, 255, 255, 0.75);
+        --color-text-main: #1e1b4b;
+        --color-text-secondary: #4c1d95;
+        --color-text-muted: #7c3aed80;
         --color-primary-content: #ffffff;
+        --aurora-1: rgba(124, 58, 237, 0.18);
+        --aurora-2: rgba(236, 72, 153, 0.14);
       }
 
-      /* Daybreak theme - Modern iOS Light (Warm tones) */
+      /* ─── Daybreak — Warm Sunrise ────────────────────────────────────── */
       :root.theme-daybreak {
-        --color-primary: #f59e0b;
-        --color-primary-dark: #d97706;
-        --color-secondary: #60a5fa;
-        --color-accent: #f472b6;
+        --color-primary: #f97316;
+        --color-primary-dark: #ea580c;
+        --color-secondary: #8b5cf6;
+        --color-accent: #fbbf24;
         --color-success: #10b981;
         --color-warning: #f59e0b;
         --color-error: #ef4444;
         --color-neutral: #44403c;
-        --color-base-100: #fafafa;
-        --color-base-200: #fef3c7;
-        --color-base-300: #fde68a;
-        --color-surface: rgba(255, 255, 255, 0.8);
-        --color-text-main: #1c1917;
-        --color-text-secondary: #78716c;
-        --color-text-muted: #a8a29e;
+        --color-base-100: #fffbf5;
+        --color-base-200: #fff7ed;
+        --color-base-300: #fed7aa;
+        --color-surface: rgba(255, 251, 245, 0.82);
+        --color-text-main: #431407;
+        --color-text-secondary: #7c2d12;
+        --color-text-muted: #9a3412;
         --color-primary-content: #ffffff;
+        --aurora-1: rgba(249, 115, 22, 0.14);
+        --aurora-2: rgba(139, 92, 246, 0.12);
       }
 
-      /* Twilight theme - Modern iOS Dark (True Black) */
+      /* ─── Twilight — Deep Space Dark ────────────────────────────────── */
       :root.theme-twilight {
-        --color-primary: #818cf8;
-        --color-primary-dark: #6366f1;
-        --color-secondary: #f472b6;
-        --color-accent: #2dd4bf;
+        --color-primary: #a78bfa;
+        --color-primary-dark: #8b5cf6;
+        --color-secondary: #34d399;
+        --color-accent: #fb7185;
         --color-success: #34d399;
         --color-warning: #fbbf24;
         --color-error: #f87171;
-        --color-neutral: #d1d5db;
-        --color-base-100: #0f0f0f;
-        --color-base-200: #1a1a1a;
-        --color-base-300: #262626;
-        --color-surface: rgba(255, 255, 255, 0.05);
-        --color-text-main: #f9fafb;
-        --color-text-secondary: #d1d5db;
-        --color-text-muted: #9ca3af;
+        --color-neutral: #c4b5fd;
+        --color-base-100: #080c18;
+        --color-base-200: #0e1425;
+        --color-base-300: #172035;
+        --color-surface: rgba(15, 22, 41, 0.78);
+        --color-text-main: #e8e8f5;
+        --color-text-secondary: #c4b5fd;
+        --color-text-muted: #6d6a8a;
         --color-primary-content: #ffffff;
+        --aurora-1: rgba(167, 139, 250, 0.22);
+        --aurora-2: rgba(52, 211, 153, 0.14);
       }
 
-      /* Forest theme - Modern iOS Dark (Green accent) */
+      /* ─── Forest — Bioluminescent Dark ──────────────────────────────── */
       :root.theme-forest {
-        --color-primary: #34d399;
-        --color-primary-dark: #10b981;
-        --color-secondary: #facc15;
-        --color-accent: #e879f9;
-        --color-success: #34d399;
+        --color-primary: #10b981;
+        --color-primary-dark: #059669;
+        --color-secondary: #fcd34d;
+        --color-accent: #a78bfa;
+        --color-success: #10b981;
         --color-warning: #fbbf24;
         --color-error: #f87171;
-        --color-neutral: #a8a29e;
-        --color-base-100: #0f0f0f;
-        --color-base-200: #1c1917;
-        --color-base-300: #292524;
-        --color-surface: rgba(255, 255, 255, 0.05);
-        --color-text-main: #fafaf9;
-        --color-text-secondary: #d6d3d1;
-        --color-text-muted: #a8a29e;
-        --color-primary-content: #1c1917;
+        --color-neutral: #6ee7b7;
+        --color-base-100: #060f0a;
+        --color-base-200: #0b1a10;
+        --color-base-300: #142b1c;
+        --color-surface: rgba(11, 26, 16, 0.78);
+        --color-text-main: #ecfdf5;
+        --color-text-secondary: #6ee7b7;
+        --color-text-muted: #2d6a4f;
+        --color-primary-content: #022c22;
+        --aurora-1: rgba(16, 185, 129, 0.22);
+        --aurora-2: rgba(167, 139, 250, 0.12);
       }
 
-      /* Liquid Glass Effect (iOS 26 style) */
+      /* ─── Glass Utilities ────────────────────────────────────────────── */
       .glass {
-        position: relative;
         background: var(--color-surface);
-        backdrop-filter: blur(40px) saturate(200%) brightness(1.1);
-        -webkit-backdrop-filter: blur(40px) saturate(200%) brightness(1.1);
-        border: 1px solid rgba(255, 255, 255, 0.18);
+        backdrop-filter: blur(24px) saturate(180%);
+        -webkit-backdrop-filter: blur(24px) saturate(180%);
+        border: 1px solid rgba(255, 255, 255, 0.14);
         box-shadow:
-          0 8px 32px rgba(0, 0, 0, 0.12),
-          inset 0 1px 0 rgba(255, 255, 255, 0.15);
-      }
-
-      /* Glass with light reflection */
-      .glass::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 50%;
-        background: linear-gradient(
-          180deg,
-          rgba(255, 255, 255, 0.12) 0%,
-          rgba(255, 255, 255, 0) 100%
-        );
-        border-radius: inherit;
-        pointer-events: none;
+          0 4px 24px rgba(0, 0, 0, 0.10),
+          inset 0 1px 0 rgba(255, 255, 255, 0.18);
       }
 
       .glass-heavy {
         background: var(--color-surface);
-        backdrop-filter: blur(60px) saturate(200%) brightness(1.15);
-        -webkit-backdrop-filter: blur(60px) saturate(200%) brightness(1.15);
-        border: 1px solid rgba(255, 255, 255, 0.25);
+        backdrop-filter: blur(48px) saturate(200%);
+        -webkit-backdrop-filter: blur(48px) saturate(200%);
+        border: 1px solid rgba(255, 255, 255, 0.20);
         box-shadow:
           0 12px 48px rgba(0, 0, 0, 0.18),
-          inset 0 2px 0 rgba(255, 255, 255, 0.2),
-          inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+          inset 0 1px 0 rgba(255, 255, 255, 0.22);
       }
 
-      /* Frosted card with glow */
       .glass-card {
-        position: relative;
-        background: linear-gradient(
-          135deg,
-          rgba(255, 255, 255, 0.1) 0%,
-          rgba(255, 255, 255, 0.05) 100%
-        );
-        backdrop-filter: blur(30px) saturate(180%) brightness(1.1);
-        -webkit-backdrop-filter: blur(30px) saturate(180%) brightness(1.1);
-        border: 1px solid rgba(255, 255, 255, 0.2);
+        background: var(--color-surface);
+        backdrop-filter: blur(20px) saturate(160%);
+        -webkit-backdrop-filter: blur(20px) saturate(160%);
+        border: 1px solid rgba(255, 255, 255, 0.16);
         box-shadow:
-          0 8px 32px rgba(0, 0, 0, 0.1),
-          0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+          0 8px 32px rgba(0, 0, 0, 0.10),
+          inset 0 1px 0 rgba(255, 255, 255, 0.14);
       }
 
-      /* Glow effect for interactive elements */
+      /* ─── Glow ───────────────────────────────────────────────────────── */
       .glow-primary {
         box-shadow:
-          0 0 20px rgba(99, 102, 241, 0.4),
-          0 0 40px rgba(99, 102, 241, 0.2),
-          0 4px 16px rgba(0, 0, 0, 0.1);
+          0 0 0 1px var(--color-primary),
+          0 0 24px rgba(var(--color-primary), 0.3),
+          0 4px 16px rgba(0, 0, 0, 0.10);
       }
 
       .glow-primary:hover {
         box-shadow:
-          0 0 30px rgba(99, 102, 241, 0.6),
-          0 0 60px rgba(99, 102, 241, 0.3),
+          0 0 0 1px var(--color-primary),
+          0 0 40px rgba(var(--color-primary), 0.4),
           0 8px 24px rgba(0, 0, 0, 0.15);
       }
 
-      /* Shimmer effect */
+      /* ─── Shimmer ────────────────────────────────────────────────────── */
       @keyframes shimmer {
-        0% {
-          background-position: -200% center;
-        }
-        100% {
-          background-position: 200% center;
-        }
+        from { background-position: -200% center; }
+        to   { background-position:  200% center; }
       }
 
       .shimmer {
-        background: linear-gradient(
-          90deg,
-          transparent 0%,
-          rgba(255, 255, 255, 0.3) 50%,
-          transparent 100%
-        );
+        background: linear-gradient(90deg,
+          transparent 0%, rgba(255,255,255,0.28) 50%, transparent 100%);
         background-size: 200% 100%;
         animation: shimmer 3s infinite;
       }
 
-      /* Light refraction border */
+      /* ─── Gradient border ────────────────────────────────────────────── */
       .refract-border {
         border: 2px solid transparent;
         background-image:
           linear-gradient(var(--color-base-100), var(--color-base-100)),
-          linear-gradient(
-            135deg,
-            rgba(255, 255, 255, 0.4),
-            rgba(99, 102, 241, 0.3),
-            rgba(236, 72, 153, 0.3),
-            rgba(255, 255, 255, 0.4)
-          );
+          linear-gradient(135deg,
+            rgba(255,255,255,0.4),
+            var(--color-primary),
+            var(--color-secondary),
+            rgba(255,255,255,0.4));
         background-origin: border-box;
         background-clip: padding-box, border-box;
       }

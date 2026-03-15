@@ -37,18 +37,22 @@ const StandardNavItem: React.FC<{ item: typeof navItems[0] }> = ({ item }) => {
     const isActive = location.pathname.startsWith(item.path);
     return (
         <NavLink
-        to={item.path}
-        className={`flex flex-col items-center justify-center gap-1 w-full py-2
-           transition-all duration-base ease-ios
-           min-h-touch ${
-            isActive
-              ? 'text-primary scale-105'
-              : 'text-text-muted hover:text-primary active:scale-95'
-          }`}
-      >
-        <item.icon size={24} strokeWidth={isActive ? 2.5 : 2} />
-        <span className="text-xs font-semibold">{item.label}</span>
-      </NavLink>
+          to={item.path}
+          className={`relative flex flex-col items-center justify-center gap-0.5 w-full py-2
+             transition-all duration-base ease-ios min-h-touch ${
+              isActive
+                ? 'text-primary'
+                : 'text-text-muted hover:text-primary active:scale-95'
+            }`}
+        >
+          {isActive && (
+            <span className="absolute inset-x-1 inset-y-1 rounded-2xl bg-primary/10 -z-10" />
+          )}
+          <item.icon size={22} strokeWidth={isActive ? 2.5 : 1.8} className="relative z-10" />
+          <span className={`text-xs relative z-10 ${isActive ? 'font-bold' : 'font-medium'}`}>
+            {item.label}
+          </span>
+        </NavLink>
     );
 }
 
@@ -120,14 +124,12 @@ const MainLayout: React.FC = () => {
                 <Outlet />
             </main>
 
-            <footer className="glass flex-shrink-0 border-t border-base-300/50 sticky bottom-0 z-40">
-                <nav className="flex items-center justify-around max-w-md mx-auto h-16 px-2">
+            <footer className="flex-shrink-0 sticky bottom-0 z-40 px-3 pt-2 pb-[max(env(safe-area-inset-bottom),8px)]">
+                <nav className="glass rounded-2xl flex items-center justify-around max-w-md mx-auto h-16 px-2 shadow-elevated">
                     {leftItems.map(item => <StandardNavItem key={item.path} item={item} />)}
                     {centerItem && <CentralNavItem item={centerItem} />}
                     {rightItems.map(item => <StandardNavItem key={item.path} item={item} />)}
                 </nav>
-                {/* iOS safe area padding */}
-                <div className="h-[env(safe-area-inset-bottom)]" />
             </footer>
         </div>
     );
