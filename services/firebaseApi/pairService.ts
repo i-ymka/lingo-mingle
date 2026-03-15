@@ -36,8 +36,8 @@ export const createPair = async (userId: string): Promise<Pair> => {
   const pairRef = doc(database, 'pairs', pairId);
   const inviteCodeRef = doc(database, 'inviteCodes', inviteCode);
 
-  // Invite code expires in 5 minutes
-  const expiresAt = new Date(Date.now() + 5 * 60 * 1000);
+  // Invite code expires in 30 minutes
+  const expiresAt = new Date(Date.now() + 30 * 60 * 1000);
 
   const newPair: Pair = {
     id: pairId,

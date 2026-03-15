@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useData } from '../../contexts/DataContext';
 import * as mockApi from '../../services/mockApi';
@@ -7,13 +7,21 @@ import Button from '../ui/Button';
 import Input from '../ui/Input';
 
 const PairingScreen: React.FC = () => {
-  const { user, loadPair, useFirebase } = useData();
+  const { user, pair, loadPair, useFirebase } = useData();
   const [inviteCode, setInviteCode] = useState('');
   const [createdPairId, setCreatedPairId] = useState<string | null>(null);
   const [createdCode, setCreatedCode] = useState<string | null>(null);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+
+  // Navigate to inbox once pair state is committed — avoids race condition
+  // where navigate('/inbox') fires before setPair completes.
+  useEffect(() => {
+    if (pair) {
+      navigate('/inbox');
+    }
+  }, [pair, navigate]);
 
   if (!user) {
     navigate('/onboarding');
@@ -62,7 +70,7 @@ const PairingScreen: React.FC = () => {
         if (joinedPair) {
           await loadPair(joinedPair.id);
           console.log('✅ Joined pair in Firebase:', joinedPair.id);
-          navigate('/inbox');
+          // Navigation handled by useEffect when pair state commits
         }
       } else {
         // localStorage
@@ -93,7 +101,7 @@ const PairingScreen: React.FC = () => {
     try {
       if (createdPairId) {
         await loadPair(createdPairId);
-        navigate('/inbox');
+        // Navigation handled by useEffect when pair state commits
       } else if (useFirebase) {
         // Shouldn't happen, but handle gracefully
         setError('Pair ID not found. Please try again.');
@@ -102,7 +110,7 @@ const PairingScreen: React.FC = () => {
         const pair = mockApi.getPairByInviteCode(createdCode!);
         if (pair) {
           loadPair(pair.id);
-          navigate('/inbox');
+          // Navigation handled by useEffect when pair state commits
         }
       }
     } catch (err) {
@@ -123,7 +131,7 @@ const PairingScreen: React.FC = () => {
         </div>
         <p className="text-text-muted mt-6">Ready to start? Click below to continue.</p>
         {error && (
-          <div className="text-red-500 text-sm p-3 bg-red-50 rounded-lg mt-4">
+          <div className="text-error text-sm p-3 bg-error/10 border border-error/20 rounded-lg mt-4">
             {error}
           </div>
         )}
@@ -143,7 +151,7 @@ const PairingScreen: React.FC = () => {
 
       <div className="space-y-8">
         {error && (
-          <div className="text-red-500 text-sm p-3 bg-red-50 rounded-lg">
+          <div className="text-error text-sm p-3 bg-error/10 border border-error/20 rounded-lg">
             {error}
           </div>
         )}
