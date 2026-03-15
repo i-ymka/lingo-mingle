@@ -6,6 +6,8 @@ export default {
   ],
   theme: {
     extend: {
+      // NOTE: No custom spacing override — use Tailwind defaults (h-16=64px, h-4=16px, etc.)
+      // Custom 8pt pixel values were overriding the numeric scale, causing h-16=16px (nav broken).
       colors: {
         primary: 'var(--color-primary)',
         'primary-dark': 'var(--color-primary-dark)',
@@ -23,20 +25,6 @@ export default {
         'text-secondary': 'var(--color-text-secondary)',
         'text-muted': 'var(--color-text-muted)',
         'primary-content': 'var(--color-primary-content)'
-      },
-      // 8pt Grid Spacing System
-      spacing: {
-        '4': '4px',
-        '8': '8px',
-        '12': '12px',
-        '16': '16px',
-        '20': '20px',
-        '24': '24px',
-        '32': '32px',
-        '40': '40px',
-        '48': '48px',
-        '56': '56px',
-        '64': '64px',
       },
       // Modern iOS Border Radius
       borderRadius: {
